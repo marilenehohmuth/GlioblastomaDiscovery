@@ -26,27 +26,17 @@ ggplot(corr.intersect,
   ylab("Number of proteins") +
   xlab("Protein class") +
   scale_fill_manual(values = qualitative_hcl(length(rownames(corr.intersect)), palette = "pastel1")) 
-
-
-
-
-
-
-
-
-
-
-+
-  coord_polar(theta = "y", 
-              start = 0) +
-  theme_void() +
-  scale_fill_manual(values = qualitative_hcl(length(rownames(corr.intersect)), palette = "pastel1")) + 
-  theme(legend.position="bottom") +
-  geom_label_repel(data = corr.intersect,
-                   aes(y = pos, label = V2),
-                   size = 4.5, 
-                   nudge_x = 1, 
-                   show.legend = FALSE,
-                   max.overlaps = 50) +
-  guides(fill = guide_legend(title = "Group")) +
-  theme_void()
+# +
+#   coord_polar(theta = "y", 
+#               start = 0) +
+#   theme_void() +
+#   scale_fill_manual(values = qualitative_hcl(length(rownames(corr.intersect)), palette = "pastel1")) + 
+#   theme(legend.position="bottom") +
+#   geom_label_repel(data = corr.intersect,
+#                    aes(y = pos, label = V2),
+#                    size = 4.5, 
+#                    nudge_x = 1, 
+#                    show.legend = FALSE,
+#                    max.overlaps = 50) +
+#   guides(fill = guide_legend(title = "Group")) +
+#   theme_void()

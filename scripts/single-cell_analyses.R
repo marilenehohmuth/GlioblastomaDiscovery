@@ -552,7 +552,7 @@ for(g in rownames(cellrouter_richards@assays$RNA@ndata)){
 write.csv(df_richards, 
           file = "results/richards/richards_Correlation_PRNPvsAllGenes.csv")
 
-################################################################################
+# PART 5 - DARMANIS + NEFTEL + RICHARDS ####################
 
 
 df_darmanis <- subset(df_darmanis,
