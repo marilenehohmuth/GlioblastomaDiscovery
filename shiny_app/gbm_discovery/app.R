@@ -1,5 +1,20 @@
 # Glioblastoma
 
+library(devtools)
+
+# Install fusca dependencies
+
+devtools::install_github("sctyner/geomnet")
+
+list.of.packages <- c('cccd', 'grid', 'tsne', 'Rtsne', 'igraph', 'mclust', 'ggplot2', 'pheatmap', 'reshape', 'reshape2')
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[, "Package"])]
+if(length(new.packages)) install.packages(new.packages, repos = c("http://cran.rstudio.com/", "https://bioconductor.org/biocLite.R"))
+
+install.packages("Vennerable", repos = "http://R-Forge.R-project.org")
+
+# Install fusca
+devtools::install_github("edroaldo/fusca")
+
 # Load packages ---------------------------------------------------------------
 
 library(shiny)
