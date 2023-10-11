@@ -1,0 +1,13 @@
+name: gbm_discovery
+title: gbm_discovery
+username:
+account: rafaeldossantospeixoto
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 9379365
+bundleId: 7398624
+url: https://rafaeldossantospeixoto.shinyapps.io/gbm_discovery/
+when: 1687970692.0198
+lastSyncTime: 1687970692.01983
+asMultiple: FALSE
+asStatic: FALSE
