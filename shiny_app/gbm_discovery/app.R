@@ -3,7 +3,7 @@
 library(devtools)
 
 # Install fusca dependencies
-
+# Breno's edit
 devtools::install_github("sctyner/geomnet")
 
 list.of.packages <- c('cccd', 'grid', 'tsne', 'Rtsne', 'igraph', 'mclust', 'ggplot2', 'pheatmap', 'reshape', 'reshape2')
