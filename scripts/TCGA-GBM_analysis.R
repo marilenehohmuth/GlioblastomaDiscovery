@@ -17,7 +17,7 @@ library(RColorBrewer)             #
 
 print("Loaded packages.")
 
-setwd("manuscript2022/")
+# setwd("manuscript2022/")
 
 # PART 1 - ANALYSIS OF GBM DATA FROM TCGA ######################################
 
@@ -30,8 +30,8 @@ query_GBM <- GDCquery(project = "TCGA-GBM",
                       data.category = "Transcriptome Profiling",
                       data.type = "Gene Expression Quantification",
                       workflow.type = "STAR - Counts",
-                      experimental.strategy = "RNA-Seq",
-                      legacy = FALSE)
+                      experimental.strategy = "RNA-Seq")
+                      # legacy = FALSE)
 GDCdownload(query_GBM,
             method = "api",
             files.per.chunk = 10)
@@ -47,18 +47,18 @@ print("Retrieved GBM data from TCGA.")
 
 ########## Step 2: Converting ENSEMBL IDs to gene symbols ##########
 
-ensembl <- useMart("ENSEMBL_MART_ENSEMBL")
-ensembl = useDataset("hsapiens_gene_ensembl",
-                     mart = ensembl)
-genemap <- getBM(filters = c("ensembl_gene_id"),
-                 attributes = c("ensembl_gene_id","hgnc_symbol"),
-                 values = rownames(GBM_count_data),
-                 mart = ensembl)
-idx <- match(rownames(GBM_count_data), genemap$ensembl_gene_id)
-GBM_count_data$hgnc_symbol <- genemap$hgnc_symbol[idx]
-
-rownames(GBM_count_data) <- make.names(GBM_count_data$hgnc_symbol, unique = TRUE)
-GBM_count_data$hgnc_symbol <- NULL
+# ensembl <- useMart("ENSEMBL_MART_ENSEMBL")
+# ensembl <- useDataset("hsapiens_gene_ensembl",
+#                      mart = ensembl)
+# genemap <- getBM(filters = c("ensembl_gene_id"),
+#                  attributes = c("ensembl_gene_id","hgnc_symbol"),
+#                  values = rownames(GBM_count_data),
+#                  mart = ensembl)
+# idx <- match(rownames(GBM_count_data), genemap$ensembl_gene_id)
+# GBM_count_data$hgnc_symbol <- genemap$hgnc_symbol[idx]
+# 
+# rownames(GBM_count_data) <- make.names(GBM_count_data$hgnc_symbol, unique = TRUE)
+# GBM_count_data$hgnc_symbol <- NULL
   
 ########## Step 3: Exploring PRNP expression in different tissue types ##########
 
@@ -157,10 +157,15 @@ pGBM.idh.prnp
 dev.off()
 
 # Plotting PRNP levels across primary GBM subtypes.
+## remove NE classification
+pGBM_log_metadata <- pGBM_log_metadata %>% 
+  mutate(paper_Transcriptome.Subtype_clean = ifelse(paper_Transcriptome.Subtype == 'NE', 
+                                                    NA, as.character(paper_Transcriptome.Subtype)))
+
 pGBM.sub.prnp <- ggplot(pGBM_log_metadata,
-       aes(x = paper_Transcriptome.Subtype,
+       aes(x = paper_Transcriptome.Subtype_clean,
            y = ENSG00000171867.17, # PRNP gene
-           fill = paper_Transcriptome.Subtype)) +
+           fill = paper_Transcriptome.Subtype_clean)) + # paper_Transcriptome.Subtype)) +
   geom_violin(scale = "width") +
   geom_boxplot(width = 0.25,
                outlier.shape = NA) +
@@ -176,8 +181,10 @@ pGBM.sub.prnp <- ggplot(pGBM_log_metadata,
                      label.y.npc = "bottom",
                      label.x.npc = "left",
                      size = 4) +
-  scale_x_discrete(labels = c("Classical", "Mesenchymal", "Neural", "Proneural", "Unclassified")) +
-  scale_fill_manual(values = c("#F8766D", "#7CAE00", "#00BFC4", "#C77CFF", "#E5E0E4"))
+  scale_x_discrete(labels = c("Classical", "Mesenchymal", "Proneural", "Unclassified")) +
+  scale_fill_manual(values = c("#F8766D", "#7CAE00", "#C77CFF", "#E5E0E4"))
+  # scale_x_discrete(labels = c("Classical", "Mesenchymal", "Neural", "Proneural", "Unclassified")) +
+  # scale_fill_manual(values = c("#F8766D", "#7CAE00", "#00BFC4", "#C77CFF", "#E5E0E4"))
 
 pdf("results/TCGA/PRNP_expression_across_GBM_subtypes.pdf",
     width = 4,
