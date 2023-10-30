@@ -303,7 +303,7 @@ dev.off()
 
 groups.prnp.exp.hist <- ggplot(PRNP_counts,
        aes(x = ENSG00000171867.17,
-           y = ..density..,
+           y = after_stat(density),
            fill = PRNP_status)) +
   geom_histogram(color = "black",
                  alpha=0.6,
