@@ -271,17 +271,23 @@ pdf("results/TCGA/IDH_status_across_PRNP-High_and_PRNP-Low_groups.pdf",
 groups.prnp.idh
 dev.off()
 
+## remove NE classification
+PRNP_quartiles_log_metadata <- PRNP_quartiles_log_metadata %>% 
+  mutate(paper_Transcriptome.Subtype_clean = ifelse(paper_Transcriptome.Subtype == 'NE', 
+                                                    NA, as.character(paper_Transcriptome.Subtype)))
 groups.prnp.sub <- ggplot(PRNP_quartiles_log_metadata,
        aes(x = reorder(PRNP_status, ENSG00000171867.17),
-           fill = unlist(paper_Transcriptome.Subtype))) +
+           fill = unlist(paper_Transcriptome.Subtype_clean))) +
   geom_bar(position = "fill",
            color = "black") +
   theme_classic() +
   xlab("Group") +
   ylab("Proportion") +
   scale_fill_manual(name = "Subtype", 
-                    values = c("#F8766D", "#7CAE00", "#00BFC4", "#C77CFF", "snow2"),
-                    labels = c("Classical","Mesenchymal", "Neural", "Proneural", "Unclassified")) + 
+                    values = c("#F8766D", "#7CAE00", "#C77CFF", "snow2"),
+                    labels = c("Classical","Mesenchymal", "Proneural", "Unclassified")) + 
+                    # values = c("#F8766D", "#7CAE00", "#00BFC4", "#C77CFF", "snow2"),
+                    # labels = c("Classical","Mesenchymal", "Neural", "Proneural", "Unclassified")) + 
   theme(axis.text.x = element_text(angle = 20, vjust = 1, hjust = 1, size = 15),
         axis.text.y = element_text(size = 15),
         axis.title.y = element_text(size = 15),
