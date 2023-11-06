@@ -21,9 +21,6 @@ library(GSVA)                     # 1.38.2
 library(Hmisc)                    #
 library(RColorBrewer)             #
 
-
-# PART 1 - ANALYSIS OF GBM DATA FROM TCGA ######################################
-
 ################################
 #### Step 1: Data retrieval ####
 ################################
