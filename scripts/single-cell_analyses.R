@@ -695,7 +695,7 @@ df_richards <- df_richards %>% mutate(significant = case_when(
     pvalue > 0.05 ~ "Non-significant"
 ))
 
-#### @ FIGURE 2C, CENTRAL PANEL (MAIN) @ #### 
+#### @ FIGURE 2C, RIGHT PANEL (MAIN) @ #### 
 richards.cor <- ggplot(
     df_richards,
     aes(y = correlation, x = 1:length(rownames(df_richards)), color = factor(significant))
