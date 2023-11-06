@@ -20,7 +20,7 @@ library(biomaRt)                  # 2.46.3
 library(GSVA)                     # 1.38.2
 library(Hmisc)                    #
 library(RColorBrewer)             #
-
+ 
 ################################
 #### Step 1: Data retrieval ####
 ################################
@@ -113,7 +113,7 @@ pGBM_log_metadata <- cbind(GBM_primary_tumor_metadata, pGBM_log.t)
 
 saveRDS(pGBM_log_metadata, file = "results/TCGA/PrimaryGBMs_logData+Metadata.RDS")
 
-#### @ FIGURE 1B, LEFT PANEL @ #### 
+#### @ FIGURE 1B, LEFT PANEL (MAIN) @ #### 
 # Plotting PRNP levels across IDH-WT and IDH-mutant primary GBMs.
 pGBM.idh.prnp <- ggplot(
   pGBM_log_metadata,
@@ -145,7 +145,7 @@ pdf("results/TCGA/PRNP_expression_GBM_Mutant_WT.pdf", width = 4, height = 4.5)
 pGBM.idh.prnp
 dev.off()
 
-#### @ FIGURE 1B, RIGHT PANEL @ #### 
+#### @ FIGURE 1B, RIGHT PANEL (MAIN) @ #### 
 # Plotting PRNP levels across primary GBM subtypes.
 pGBM.sub.prnp <- ggplot(
   pGBM_log_metadata,
@@ -175,7 +175,7 @@ pdf("results/TCGA/PRNP_expression_across_GBM_subtypes.pdf", width = 4, height = 
 pGBM.sub.prnp
 dev.off()
 
-#### @ FIGURE 1B, LEFT+RIGHT PANEL @ #### 
+#### @ FIGURE 1B, LEFT+RIGHT PANEL (MAIN) @ #### 
 pdf("results/TCGA/arranged_plots_pGBM.pdf", width = 8, height = 4)
 cowplot::plot_grid(
   plotlist = list(pGBM.idh.prnp, pGBM.sub.prnp),
@@ -235,7 +235,7 @@ PRNP_quartiles_metadata <- as.data.frame(t(GBM_primary_tumor_metadata)) %>% dply
 PRNP_quartiles_log_metadata <- cbind(PRNP_quartiles_log_metadata, t(PRNP_quartiles_metadata)) 
 colnames(PRNP_quartiles_log_metadata)[colnames(PRNP_quartiles_log_metadata) == "ENSG00000171867.17"] <- "PRNP"
 
-#### @ FIGURE 1C @ #### 
+#### @ FIGURE 1C (MAIN) @ #### 
 # Distribution of log-normalised PRNP counts in the PRNP-High/Low groups.
 groups.prnp.exp.hist <- ggplot(
   PRNP_counts,
@@ -261,7 +261,7 @@ pdf("results/TCGA/PRNP_distribution_PRNP-High_and_PRNP-Low_groups.pdf", width = 
 groups.prnp.exp.hist
 dev.off()
 
-#### @ FIGURE 1D, LEFT PANEL @ #### 
+#### @ FIGURE 1D, LEFT PANEL (MAIN) @ #### 
 # Proportion of IDH-WT, IDH-mutant and unclassified samples in the PRNP-High/Low groups.
 groups.prnp.idh <- ggplot(
   PRNP_quartiles_log_metadata,
@@ -289,7 +289,7 @@ pdf("results/TCGA/IDH_status_across_PRNP-High_and_PRNP-Low_groups.pdf", width = 
 groups.prnp.idh
 dev.off()
 
-#### @ FIGURE 1D, RIGHT PANEL @ #### 
+#### @ FIGURE 1D, RIGHT PANEL (MAIN) @ #### 
 # Proportion of classical, mesenchymal, proneural and unclassified samples in the PRNP-High/Low groups.
 groups.prnp.sub <- ggplot(
   PRNP_quartiles_log_metadata,
@@ -369,7 +369,7 @@ labs <- c(
   paste0("Downregulated (n=", nrow(deg.all[deg.all$classification == "Downregulated",]), ")")
 )
 
-#### @ FIGURE 1E @ ####
+#### @ FIGURE 1E (MAIN) @ ####
 # Volcano plot with differentially expressed transcripts. 
 volcano <- ggplot(
   deg.all,
@@ -405,5 +405,5 @@ dev.off()
 # Need to add over-representation analysis or GSEA with clusterProfiler inside R to remove external dependency on 
 # g:Profiler (this is a website where you can upload a gene list and get enrichment analysis results).
 
-#### @ FIGURE 1F @ ####
+#### @ FIGURE 1F (MAIN) @ ####
 # Will be a bar plot showing intracellular traffic and vesicle-related terms.
