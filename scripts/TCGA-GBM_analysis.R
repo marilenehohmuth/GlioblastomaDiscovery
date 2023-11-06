@@ -403,3 +403,6 @@ dev.off()
 
 # Need to add over-representation analysis or GSEA with clusterProfiler inside R to remove external dependency on 
 # g:Profiler (this is a website where you can upload a gene list and get enrichment analysis results).
+
+#### @ FIGURE 1F @ ####
+# Will be a bar plot showing intracellular traffic and vesicle-related terms.
