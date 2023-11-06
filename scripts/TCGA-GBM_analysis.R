@@ -1,4 +1,8 @@
-# TCGA ANALYSES FOR PAPER ######################################################
+# TCGA-GBM analysis #########################################################
+# @ This script generates the plots present in the first main figure of the # 
+# @ manuscript.                                                             #
+#############################################################################
+
 
 ##########################
 #### Loading packages ####
