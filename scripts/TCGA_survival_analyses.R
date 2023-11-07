@@ -6,64 +6,71 @@ library(maxstat)
 library(survival)
 
 pGBM_log_metadata <- readRDS("results/TCGA/PrimaryGBMs_logData+Metadata.RDS")
-genesets <- read.csv("data/c5.go.v7.5.1.symbols.gmt",
-                     sep = "\t",
-                     header = FALSE,
-                     row.names = 1)
+genesets <- read.csv(
+    "data/c5.go.v7.5.1.symbols.gmt",
+    sep = "\t",
+    header = FALSE,
+    row.names = 1)
 genesets <- as.data.frame(t(genesets))
 
 pGBM_log_metadata <- pGBM_log_metadata[pGBM_log_metadata$paper_IDH.status == "WT",]
 
 signature_survival <- function(geneset.name) {
-  genes.list <- list(geneset.name = genesets[,geneset.name][genesets[,geneset.name] != ""])
-  signature.scores <- gsva(t(pGBM_log_metadata[,106:56707]),
-                 genes.list)
-  signature.scores <- as.data.frame(t(signature.scores))
-  signature.scores <- cbind(signature.scores, pGBM_log_metadata %>% select(paper_Survival..months., paper_Vital.status..1.dead.))
-  colnames(signature.scores) <- c("scores","months","status")
-  cutoff.test <- maxstat.test(Surv(months, status) ~ scores, 
-                              data = signature.scores,
-                              smethod = "LogRank",
-                              pmethod = "HL")
-  signature.scores <- signature.scores %>% mutate(classification = case_when(scores <= as.numeric(cutoff.test[["estimate"]]) ~ "Low",
-                                                                             scores > as.numeric(cutoff.test[["estimate"]]) ~ "High"))
-  fit <- survfit(Surv(months, status) ~ classification, 
-                 data = signature.scores,
-                 type = "kaplan-meier")
-  dist <- ggplot(signature.scores,
-         aes(x = "",
-             y = scores)) +
-    geom_boxplot() +
-    geom_jitter(aes(color = classification)) +
-    theme_classic() +
-    ylab("GSVA scores") +
-    xlab("") +
-    theme(axis.ticks.x = element_blank(),
-          legend.position = "top") +
-    scale_color_discrete(name = "Signature")
-  surv.plot <- ggsurvplot(fit, 
-                     data = signature.scores,
-                     pval = TRUE,
-                     pval.method = TRUE,
-                     conf.int = FALSE,
-                     pval.coord = c(25, 0.75),
-                     pval.method.coord = c(25, 0.85),
-                     ggtheme = theme_classic(),
-                     legend = "right",
-                     legend.labs = c("Above cutoff", "Below cutoff"),
-                     xlab = "Time in months",
-                     title = geneset.name,
-                     legend.title = paste0("Cutoff = ", signif(as.numeric(cutoff.test[["estimate"]]), digits = 4))) 
-  plot.list <- list("Dist" = dist,
-                    "Surv" = ggpubr::ggpar(surv.plot,
-                                           font.legend = list(size = 15),
-                                           font.x = list(size = 15),
-                                           font.y = list(size = 15),
-                                           font.xtickslab = list(size = 15),
-                                           font.ytickslab = list(size = 15)))
+    genes.list <- list(geneset.name = genesets[,geneset.name][genesets[,geneset.name] != ""])
+    signature.scores <- gsva(t(pGBM_log_metadata[,106:56707]), genes.list)
+    signature.scores <- as.data.frame(t(signature.scores))
+    signature.scores <- cbind(signature.scores, pGBM_log_metadata %>% select(paper_Survival..months., paper_Vital.status..1.dead.))
+    colnames(signature.scores) <- c("scores","months","status")
+    cutoff.test <- maxstat.test(
+        Surv(months, status) ~ scores, 
+        data = signature.scores,
+        smethod = "LogRank",
+        pmethod = "HL"
+    )
+    signature.scores <- signature.scores %>% mutate(classification = case_when(
+        scores <= as.numeric(cutoff.test[["estimate"]]) ~ "Low",
+        scores > as.numeric(cutoff.test[["estimate"]]) ~ "High"
+    ))
+    fit <- survfit(
+        Surv(months, status) ~ classification, 
+        data = signature.scores,
+        type = "kaplan-meier"
+    )
+
+    dist <- ggplot(
+        signature.scores,
+        aes(x = "", y = scores)
+    ) +
+        geom_boxplot() +
+        geom_jitter(aes(color = classification)) +
+        theme_classic() +
+        ylab("GSVA scores") +
+        xlab("") +
+        theme(axis.ticks.x = element_blank(), legend.position = "top") +
+        scale_color_discrete(name = "Signature")
+
+    surv.plot <- ggsurvplot(
+        fit, 
+        data = signature.scores,
+        pval = TRUE,
+        pval.method = TRUE,
+        conf.int = FALSE,
+        pval.coord = c(25, 0.75),
+        pval.method.coord = c(25, 0.85),
+        ggtheme = theme_classic(),
+        legend = "right",
+        legend.labs = c("Above cutoff", "Below cutoff"),
+        xlab = "Time in months",
+        title = geneset.name,
+        legend.title = paste0("Cutoff = ", signif(as.numeric(cutoff.test[["estimate"]]), digits = 4))
+    ) 
+    plot.list <- list(
+        "Dist" = dist,
+        "Surv" = ggpubr::ggpar(surv.plot, font.legend = list(size = 15), font.x = list(size = 15),
+            font.y = list(size = 15), font.xtickslab = list(size = 15), font.ytickslab = list(size = 15))
+    )
   return(plot.list)
 }
-
 
 p1 <- signature_survival("GOCC_VESICLE_LUMEN") 
 p2 <- signature_survival("GOBP_EXTRACELLULAR_VESICLE_BIOGENESIS")
@@ -79,24 +86,12 @@ p10 <- signature_survival("GOCC_TRANSPORT_VESICLE")
 pdf("surv_plots.pdf",
     width = 10,
     height = 10)
-plots <- arrange_ggsurvplots(x = list(p1[[2]],
-                                   p2[[2]],
-                                   p3[[2]],
-                                   p4[[2]],
-                                   p5[[2]],
-                                   p6[[2]],
-                                   p7[[2]],
-                                   p8[[2]],
-                                   p9[[2]],
-                                   p10[[2]]),
-                   ncol = 2,
-                   nrow = 5,
-                   print = FALSE)
-ggsave(filename = "surv_plots.pdf", plots,
-       width = 12,
-       height = 20)
-
-
+plots <- arrange_ggsurvplots(
+    x = list(p1[[2]], p2[[2]], p3[[2]], p4[[2]], p5[[2]], p6[[2]], p7[[2]], p8[[2]], p9[[2]], p10[[2]]),
+    ncol = 2,
+    nrow = 5,
+    print = FALSE)
+ggsave(filename = "surv_plots.pdf", plots, width = 12, height = 20)
 
 pdf("results/TCGA/GOCC_VESICLE_LUMEN_distribution_optimal_cutoff.pdf",
     width = 3,
