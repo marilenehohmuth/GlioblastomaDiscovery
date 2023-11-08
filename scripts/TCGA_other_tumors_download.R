@@ -12,9 +12,9 @@ library(TCGAbiolinks)             # 2.23.5
 library(SummarizedExperiment)     # 1.20.0
 
 
-#################################################
-#### Define a function to download TCGA data ####
-#################################################
+#################################33################
+#### Defining a function to download TCGA data ####
+###################################################
 
 download_tcga <- function(project_id) {
 
@@ -40,29 +40,26 @@ download_tcga <- function(project_id) {
     # Get metadata.
     metadata <- as.data.frame(colData(data))
 
-    # Get number of samples.
-    n_samples <- nrow(metadata)
-
     # Define prefix for output file names.  
-    file_prefix <- paste0("data/other_tumors/", project_id, "/TCGA-", project_id, "_", n_samples, "_samples")
+    file_prefix <- paste0("data/other_tumors/", project_id, "/TCGA-", project_id, "_")
     
     # Save count data to output file.
     saveRDS(
         count_data,
-        file = paste0(file_prefix, "_count_data.RDS")
+        file = paste0(file_prefix, "count_data.RDS")
     )
 
     # Save metadata to output file.
     saveRDS(
         metadata,
-        file = paste0(file_prefix, "_metadata.RDS")
+        file = paste0(file_prefix, "metadata.RDS")
     )
 }
 
 
-##############################################
-#### Download data from each TCGA project ####
-##############################################
+#################################################
+#### Downloading data from each TCGA project ####
+#################################################
 
 # Define TCGA project IDs.
 project_list <- c(
