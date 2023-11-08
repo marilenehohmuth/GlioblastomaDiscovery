@@ -1,4 +1,4 @@
-# Analysis of single-cell datasets ###########################################
+# ANALYSIS OF SINGLE-CELL DATASETS ###########################################
 # @ This script generates the plots present in the second main figure of the # 
 # @ manuscript + supplemental material.                                      #
 ##############################################################################
@@ -175,6 +175,46 @@ plot_prnp_umap <- function(
     # Save plot to output file.
     pdf(
         "results/", dataset, "/", str_to_title(dataset), "_PRNP_expression_across_cells_UMAP_plot.pdf",
+        width = plot_width,
+        height = plot_height
+    )
+    print(plot)
+    dev.off()
+
+}
+
+# plot_sample_umap()
+# @ This function projects cells onto a UMAP plot and color them according to sample IDs, saving the plot to an output file.
+plot_sample_umap <- function(
+    dim.red, # Dataframe with cell embeddings, gene expression and cell metadata.
+    dataset, # Dataset name.
+    plot_width, # Width for UMAP plot.
+    plot_height # Height for UMAP plot.
+) {
+
+    plot <- ggplot(
+        dim.red,
+        aes(x = UMAP1, y = UMAP2, color = samples)
+    ) +
+        geom_point(size = 0.1) +
+        theme(
+            legend.position = "bottom",
+            legend.text = element_text(size=5),
+            panel.background = element_blank(),
+            panel.border = element_rect(colour = "black", fill = NA, size = 1.2),
+            legend.key.size = unit(2, 'cm')
+        ) + 
+        guides(color = guide_legend(
+            override.aes = list(size=0.8),
+            keywidth = 0,
+            keyheight = 0,
+            ncol = 3,
+            title = "Sample")
+        )
+
+    # Save plot to output file.
+    pdf(
+        "results/", dataset, "/", str_to_title(dataset), "_samples_UMAP_plot.pdf",
         width = plot_width,
         height = plot_height
     )
@@ -421,6 +461,15 @@ plot_prnp_umap(
     plot_height = 5
 )
 
+#### @ FIGURE S2A, LEFT PANEL (SUPPLEMENTAL) @ #### 
+# UMAP showing cell colored by sample.
+plot_sample_umap(
+    dim.red = dim.red.darmanis,
+    dataset = "darmanis",
+    plot_width = 5,
+    plot_height = 5
+)
+
 #############################################################
 #### Step 4: Finding signatures of PRNP+ and PRNP- cells ####
 #############################################################
@@ -534,6 +583,15 @@ plot_prnp_umap(
     plot_height = 5
 )
 
+#### @ FIGURE S2A, CENTRAL PANEL (SUPPLEMENTAL) @ #### 
+# UMAP showing cell colored by sample.
+plot_sample_umap(
+    dim.red = dim.red.neftel,
+    dataset = "neftel",
+    plot_width = 5,
+    plot_height = 5
+)
+
 #############################################################
 #### Step 4: Finding signatures of PRNP+ and PRNP- cells ####
 #############################################################
@@ -641,6 +699,15 @@ dim.red.richards <- concatenate_data(cellrouter = cellrouter_richards)
 #### @ FIGURE 2B, RIGHT PANEL (MAIN) @ #### 
 # UMAP showing cell colored by PRNP expression.
 plot_prnp_umap(
+    dim.red = dim.red.richards,
+    dataset = "richards",
+    plot_width = 5,
+    plot_height = 5
+)
+
+#### @ FIGURE S2A, RIGHT PANEL (SUPPLEMENTAL) @ #### 
+# UMAP showing cell colored by sample.
+plot_sample_umap(
     dim.red = dim.red.richards,
     dataset = "richards",
     plot_width = 5,
