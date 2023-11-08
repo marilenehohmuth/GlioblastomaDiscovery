@@ -1,4 +1,4 @@
-# Analysis of single-cell datasets ###########################################
+# ANALYSIS OF SINGLE-CELL DATASETS ###########################################
 # @ This script generates the plots present in the second main figure of the # 
 # @ manuscript + supplemental material.                                      #
 ##############################################################################
