@@ -1,6 +1,6 @@
 # DOWNLOAD OF OTHER TCGA PROJECTS ###############################################################
 # @ This script downloads RNA-seq data of the following TCGA projects:                          # 
-# @ BRCA, COAD, READ, PRAD, LUAD, KIRC, STAD, HNSC, OV, PAAD, UCEC, BLCA, CHOL, ACC, PCPG, SKCM #                                  #
+# @ BRCA, COAD, READ, PRAD, LUAD, KIRC, STAD, HNSC, OV, PAAD, UCEC, BLCA, CHOL, ACC, PCPG, SKCM #                   
 #################################################################################################
 
 
