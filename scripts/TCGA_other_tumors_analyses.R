@@ -202,6 +202,9 @@ names(labs) <- c(
   "BRCA", "COAD", "READ", "PRAD", "LUAD", "KIRC", "STAD", "HNSC", "OV",
   "PAAD", "UCEC", "BLCA", "CHOL", "ACC", "SKCM")
 
+#### @ FIGURE S8, RIGHT PANEL (SUPPLEMENTAL) @ #### 
+# Plotting the correlation between PRNP expression and traffic/vesicle signatures in
+# various tumour types from TCGA.
 pdf("results/TCGA/other_tumors/TCGA_correlation_PRNPvsTrafficGenesets.pdf",
     width = 6.5,
     height = 15)
