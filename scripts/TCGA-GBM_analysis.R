@@ -1,4 +1,4 @@
-# TCGA-GBM analysis #########################################################
+# TCGA-GBM ANALYSIS #########################################################
 # @ This script generates the plots present in the first main figure of the # 
 # @ manuscript.                                                             #
 #############################################################################
