@@ -126,10 +126,9 @@ pGBM.idh.prnp <- ggplot(
     legend.position = "none",
     axis.text.x = element_text(angle = 20, vjust = 1, hjust = 1, size = 15),
     axis.text.y = element_text(size = 15),
-    axis.title.y = element_text(size = 15),
-    plot.margin = unit(c(0, 0, 0, 0), "cm")
+    axis.title.y = element_text(size = 15)
   ) +
-  xlab(NA) +
+  xlab(NULL) +
   ggtitle("Primary GBMs") +
   ylab(expression(paste(italic("PRNP"), " expression"))) +
   scale_x_discrete(labels = c("IDH-mutant", "IDHwt", "Unclassified")) +
@@ -141,7 +140,7 @@ pGBM.idh.prnp <- ggplot(
     size = 4
   ) 
 
-pdf("results/TCGA/PRNP_expression_GBM_Mutant_WT.pdf", width = 4, height = 4.5)
+pdf(paste0(getwd(), "/results/TCGA/PRNP_expression_GBM_Mutant_WT.pdf"), width = 4, height = 6)
 pGBM.idh.prnp
 dev.off()
 
@@ -157,11 +156,10 @@ pGBM.sub.prnp <- ggplot(
   theme(
     legend.position = "none",
     axis.text.x = element_text(angle = 20, vjust = 1, hjust = 1, size = 15),
-    axis.text.y = element_text(size = 15),
-    plot.margin = unit(c(0, 0, 0, 0), "cm")
+    axis.text.y = element_text(size = 15)
   ) +
-  xlab(NA) +
-  ylab(NA) + 
+  xlab(NULL) +
+  ylab(NULL) + 
   stat_compare_means(
     label = "p.format",
     label.y.npc = "bottom",
@@ -171,12 +169,12 @@ pGBM.sub.prnp <- ggplot(
   scale_x_discrete(labels = c("Classical", "Mesenchymal", "Proneural", "Unclassified")) +
   scale_fill_manual(values = c("#F8766D", "#7CAE00", "#C77CFF", "#E5E0E4"))
 
-pdf("results/TCGA/PRNP_expression_across_GBM_subtypes.pdf", width = 4, height = 4.5)
+pdf(paste0(getwd(), "/results/TCGA/PRNP_expression_across_GBM_subtypes.pdf"), width = 5, height = 6)
 pGBM.sub.prnp
 dev.off()
 
 #### @ FIGURE 1B, LEFT+RIGHT PANEL (MAIN) @ #### 
-pdf("results/TCGA/arranged_plots_pGBM.pdf", width = 8, height = 4)
+pdf(paste0(getwd(), "/results/TCGA/arranged_plots_pGBM.pdf"), width = 8, height = 4)
 cowplot::plot_grid(
   plotlist = list(pGBM.idh.prnp, pGBM.sub.prnp),
   align = "hv",
@@ -244,9 +242,12 @@ groups.prnp.exp.hist <- ggplot(
   geom_histogram(color = "black", alpha=0.6, position = "identity", binwidth = 0.025) +
   geom_density(alpha = 0.25) +
   theme_classic() +
+  xlab(expression(paste(italic("PRNP"), " expression"))) +
   ylab("Frequency") +
-  xlab("PRNP expression") +
-  scale_fill_manual(name = "Group", values = c("orange", "steelblue1")) +
+  scale_fill_manual(
+    name = "Group", 
+    values = c("orange", "steelblue1"),
+    labels = c(expression(italic("PRNP")^"high"), expression(italic("PRNP")^"low"))) +
   theme(
     legend.position = "right",
     axis.text.x = element_text(size = 15),
@@ -254,10 +255,11 @@ groups.prnp.exp.hist <- ggplot(
     axis.title.x = element_text(size = 15),
     axis.title.y = element_text(size = 15),
     legend.title = element_text(size = 15),
-    legend.text = element_text(size = 12)
+    legend.text = element_text(size = 12),
+    legend.text.align = 0
   )
 
-pdf("results/TCGA/PRNP_distribution_PRNP-High_and_PRNP-Low_groups.pdf", width = 7, height = 3)
+pdf(paste0(getwd(), "/results/TCGA/PRNP_distribution_PRNP-High_and_PRNP-Low_groups.pdf"), width = 7, height = 3)
 groups.prnp.exp.hist
 dev.off()
 
@@ -269,10 +271,10 @@ groups.prnp.idh <- ggplot(
 ) +
   geom_bar(position = "fill", color = "black") +
   theme_classic() +
-  xlab(NA) +
+  xlab(NULL) +
   ylab("Proportion") +
   theme(
-    axis.text.x = element_text(angle = 0, size = 15),
+    axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, size = 15),
     axis.text.y = element_text(size = 15),
     axis.title.y = element_text(size = 15),
     legend.text = element_text(size = 12),
@@ -285,7 +287,7 @@ groups.prnp.idh <- ggplot(
   ) +
   scale_x_discrete(labels = c(expression(italic("PRNP")^"low"), expression(italic("PRNP")^"high")))
 
-pdf("results/TCGA/IDH_status_across_PRNP-High_and_PRNP-Low_groups.pdf", width = 4, height = 4.5)
+pdf(paste0(getwd(), "/results/TCGA/IDH_status_across_PRNP-High_and_PRNP-Low_groups.pdf"), width = 4, height = 4.5)
 groups.prnp.idh
 dev.off()
 
@@ -297,7 +299,7 @@ groups.prnp.sub <- ggplot(
 ) +
   geom_bar(position = "fill", color = "black") +
   theme_classic() +
-  xlab(NA) +
+  xlab(NULL) +
   ylab("Proportion") + 
   theme(
     axis.text.x = element_text(angle = 20, vjust = 1, hjust = 1, size = 15),
@@ -313,7 +315,7 @@ groups.prnp.sub <- ggplot(
   ) +
   scale_x_discrete(labels = c(expression(italic("PRNP")^"low"), expression(italic("PRNP")^"high")))
 
-pdf("results/TCGA/Subtypes_across_PRNP-High_and_PRNP-Low_groups.pdf", width = 4, height = 4.5)
+pdf(paste0(getwd(), "/results/TCGA/Subtypes_across_PRNP-High_and_PRNP-Low_groups.pdf"), width = 4, height = 4.5)
 groups.prnp.sub
 dev.off()
 
@@ -353,7 +355,7 @@ res_shrunken <- lfcShrink(
 # Keeping only statistically significant results.
 res_shrunken <- as.data.frame(res_shrunken)
 deg.sig <- res_shrunken[res_shrunken$padj <= 0.05,]
-write.csv(deg.sig, file = "results/TCGA/TCGA-GBM_DETs_padj005.csv")
+write.csv(deg.sig, file = paste0(getwd(), "/results/TCGA/TCGA-GBM_DETs_padj005.csv"))
 
 # Adding gene classification to complete dataframe.
 deg.all <- res_shrunken %>% mutate(classification = case_when(
@@ -364,15 +366,15 @@ deg.all <- res_shrunken %>% mutate(classification = case_when(
 )
 
 labs <- c(
-  paste0("Upregulated (n=", nrow(deg.all[deg.all$classification == "Upregulated",]), ")"),
+  paste0("Downregulated (n=", nrow(deg.all[deg.all$classification == "Downregulated",]), ")"),
   paste0("Non-significant (n=", nrow(deg.all[deg.all$classification == "Non-significant",]), ")"),
-  paste0("Downregulated (n=", nrow(deg.all[deg.all$classification == "Downregulated",]), ")")
+  paste0("Upregulated (n=", nrow(deg.all[deg.all$classification == "Upregulated",]), ")")
 )
 
 #### @ FIGURE 1E (MAIN) @ ####
 # Volcano plot with differentially expressed transcripts. 
 volcano <- ggplot(
-  deg.all,
+  deg.all[rownames(deg.all) != "ENSG00000171867.17",],
   aes(x = log2FoldChange, y = -log10(padj), color = classification)) +
   geom_point(size = 1) +
   theme_classic() +
@@ -394,16 +396,36 @@ volcano <- ggplot(
   geom_vline(xintercept = 0, linetype = "dashed") +
   geom_hline(yintercept = -log10(0.05), linetype = "dashed")
 
-pdf("results/TCGA/volcano.pdf", width = 6, height = 4)
+pdf(paste0(getwd(), "/results/TCGA/volcano.pdf"), width = 8, height = 4)
 volcano
 dev.off()
 
 #####################################################
-#### Step 9: Doing over-representation analysis  ####
+#### Step 9: Doing gene set enrichment analysis  ####
 #####################################################
 
 # Need to add over-representation analysis or GSEA with clusterProfiler inside R to remove external dependency on 
 # g:Profiler (this is a website where you can upload a gene list and get enrichment analysis results).
+
+gene_list <- deg.sig$log2FoldChange
+names(gene_list) <- gsub("\\..*", "", rownames(deg.sig))
+gene_list <- gene_list[!is.na(gene_list)]
+gene_list <- sort(gene_list, decreasing = TRUE)
+
+gse <- gseGO(
+  geneList = gene_list, 
+  ont = "ALL", 
+  keyType = "ENSEMBL", 
+  nPerm = 10000, 
+  minGSSize = 3, 
+  maxGSSize = 800, 
+  pvalueCutoff = 0.05, 
+  verbose = TRUE, 
+  OrgDb = org.Hs.eg.db, 
+  pAdjustMethod = "none"
+)
+
+write.csv(as.data.frame(gse@result), file = paste0(getwd(), "/results/TCGA/GSEA.csv"))
 
 #### @ FIGURE 1F (MAIN) @ ####
 # Will be a bar plot showing intracellular traffic and vesicle-related terms.
