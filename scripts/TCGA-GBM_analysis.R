@@ -69,7 +69,7 @@ tissue_log.t <- tissue_log.t[rownames(GBM_metadata),]
 # Mixing data.frames.
 tissue_log_metadata <- cbind(GBM_metadata, tissue_log.t)
 
-saveRDS(tissue_log_metadata, file = "results/TCGA/Tissue_logData+Metadata.RDS")
+saveRDS(tissue_log_metadata, file = paste0(getwd(), "/results/TCGA-GBM/Tissue_logData+Metadata.RDS"))
 
 ##########################################
 #### Step 3: Selecting primary tumors ####
@@ -78,13 +78,13 @@ saveRDS(tissue_log_metadata, file = "results/TCGA/Tissue_logData+Metadata.RDS")
 # Filtering metadata.
 GBM_primary_tumor_metadata <- GBM_metadata[GBM_metadata$definition == "Primary solid Tumor",]
 
-# Removing samples of the neural subtype. 
+# Creating new subtype column where the neural subtype will be classified as NA (unknown subtype).
 GBM_primary_tumor_metadata <- GBM_primary_tumor_metadata %>% dplyr::mutate(
   paper_Transcriptome.Subtype_clean = ifelse(paper_Transcriptome.Subtype == 'NE', NA, as.character(paper_Transcriptome.Subtype))
 )
 
 # Filtering raw count data according to the metadata above.
-GBM_primary_tumor_count_data <- GBM_count_data %>% dplyr::select(
+GBM_primary_tumor_count_data <- GBM_count_data %>% dplyr::dplyr::select(
   intersect(rownames(GBM_primary_tumor_metadata), colnames(GBM_count_data))
 )
 
@@ -103,7 +103,14 @@ pGBM_log <- as.data.frame(log10(pGBM_cpm1))
 
 #####################################################################################
 #### Step 5: Exploring PRNP levels across different conditions in primary tumors ####
-#####################################################################################
+##################################################################################################
+#                                                                                                #
+# Note: at this point, we will keep samples whose IDH status is mutant/unknown and samples whose #
+# transcriptional subtype is unknown (unknown now also includes the neural samples!) just to     #
+# to see the expression patterns of PRNP in these conditions. However, these samples will be     # 
+# excluded from the differential gene expression analysis that will be performed later on.       #                           
+#                                                                                                #
+##################################################################################################
 
 # Ensuring that the row names of the data.frame with log10(CPM+1) counts of primary tumors follow 
 # the same order as the row names of the data.frame with metadata.
@@ -113,7 +120,7 @@ pGBM_log.t <- pGBM_log.t[rownames(GBM_primary_tumor_metadata),]
 # Mixing data.frames.
 pGBM_log_metadata <- cbind(GBM_primary_tumor_metadata, pGBM_log.t)
 
-saveRDS(pGBM_log_metadata, file = "results/TCGA/PrimaryGBMs_logData+Metadata.RDS")
+saveRDS(pGBM_log_metadata, file = paste0(getwd(), "/results/TCGA-GBM/PrimaryGBMs_logData+Metadata.RDS"))
 
 #### @ FIGURE 1B, LEFT PANEL (MAIN) @ #### 
 # Plotting PRNP levels across IDH-WT and IDH-mutant primary GBMs.
@@ -142,7 +149,7 @@ pGBM.idh.prnp <- ggplot(
     size = 4
   ) 
 
-pdf(paste0(getwd(), "/results/TCGA/PRNP_expression_GBM_Mutant_WT.pdf"), width = 4, height = 6)
+pdf(paste0(getwd(), "/results/TCGA-GBM/PRNP_expression_GBM_Mutant_WT.pdf"), width = 4, height = 6)
 pGBM.idh.prnp
 dev.off()
 
@@ -171,12 +178,12 @@ pGBM.sub.prnp <- ggplot(
   scale_x_discrete(labels = c("Classical", "Mesenchymal", "Proneural", "Unclassified")) +
   scale_fill_manual(values = c("#F8766D", "#7CAE00", "#C77CFF", "#E5E0E4"))
 
-pdf(paste0(getwd(), "/results/TCGA/PRNP_expression_across_GBM_subtypes.pdf"), width = 5, height = 6)
+pdf(paste0(getwd(), "/results/TCGA-GBM/PRNP_expression_across_GBM_subtypes.pdf"), width = 5, height = 6)
 pGBM.sub.prnp
 dev.off()
 
 #### @ FIGURE 1B, LEFT+RIGHT PANEL (MAIN) @ #### 
-pdf(paste0(getwd(), "/results/TCGA/arranged_plots_pGBM.pdf"), width = 8, height = 4)
+pdf(paste0(getwd(), "/results/TCGA-GBM/arranged_plots_pGBM.pdf"), width = 8, height = 4)
 cowplot::plot_grid(
   plotlist = list(pGBM.idh.prnp, pGBM.sub.prnp),
   align = "hv",
@@ -189,14 +196,34 @@ dev.off()
 
 ###############################################################
 #### Step 6: Establishing groups with distinct PRNP levels ####
-###############################################################
+##################################################################################################
+#                                                                                                #
+# Now that we explored PRNP expression levels in all IDH and transcriptional subtype conditions, #
+# we will exclude samples whose IDH status is mutant/unknown and samples whose transcriptional   #
+# subtype is unknown. After that, we will create groups of samples that express high levels of   # 
+# PRNP (PRNP-High) or low levels of PRNP (PRNP-Low) and explore those groups a little bit.       #                           
+#                                                                                                #
+##################################################################################################
+
+# Remove samples whose IDH status is mutant/unknown.
+pGBM_metadata_filt <- GBM_primary_tumor_metadata %>% dplyr::filter(paper_IDH.status == "WT")
+
+# Remove samples whose transcriptional subtype is unknown.
+pGBM_metadata_filt <- pGBM_metadata_filt %>% dplyr::filter(!is.na(paper_Transcriptome.Subtype_clean))
+
+# Filter count data based on filtered metadata.
+pGBM_count_data_filt <- GBM_primary_tumor_count_data %>% dplyr::select(rownames(pGBM_metadata_filt))
+
+# Normalize filtered count data according to log10(CPM+1).
+pGBM_filt_norm <- cpm(pGBM_count_data_filt, log = FALSE)
+pGBM_filt_norm <- pGBM_filt_norm + 1
+pGBM_filt_norm <- log10(pGBM_filt_norm)
 
 # Select row that contains log-normalized PRNP counts.
-PRNP_counts_all <- pGBM_log["ENSG00000171867.17",]
+PRNP_counts_all <- pGBM_filt_norm["ENSG00000171867.17",]
 
-# Transpose that row into a column and convert it to a dataframe.
-PRNP_counts_all <- as.data.frame(t(PRNP_counts_all))
-colnames(PRNP_counts_all) <- "PRNP"
+# Put the numeric vector with log-normalized PRNP counts into a dataframe.
+PRNP_counts_all <- data.frame(PRNP = PRNP_counts_all)
 
 # Calculate the quartiles of PRNP expression based on log-normalized counts.
 PRNP_quartiles <- quantile(PRNP_counts_all$PRNP, c(0.25, 0.75))
@@ -213,7 +240,7 @@ PRNP_counts_all <- PRNP_counts_all %>% dplyr::mutate(PRNP_status = case_when(
 PRNP_counts <- PRNP_counts_all[PRNP_counts_all$PRNP_status %in% c("PRNP-Low", "PRNP-High"),]
 
 # This will be the raw count matrix for DESeq2.
-PRNP_quartiles_count_data <- GBM_primary_tumor_count_data %>% dplyr::select(rownames(PRNP_counts))
+PRNP_quartiles_count_data <- pGBM_count_data_filt %>% dplyr::select(rownames(PRNP_counts))
 
 # This will be the metadata for DESeq2.
 PRNP_quartiles_status <- PRNP_counts %>% dplyr::select(PRNP_status)
@@ -223,13 +250,13 @@ PRNP_quartiles_status <- PRNP_counts %>% dplyr::select(PRNP_status)
 ##################################################################
 
 # Selecting log10(CPM+1)-normalized counts of primary GBMs classified as PRNP-High and PRNP-Low.
-PRNP_quartiles_log_data <- as.data.frame(pGBM_log) %>% dplyr::select(rownames(PRNP_counts))
+PRNP_quartiles_log_data <- as.data.frame(pGBM_filt_norm) %>% dplyr::select(rownames(PRNP_counts))
 
 # Concatenating dataframes that contain the sample classification (PRNP-High/Low) and the log-normalized PRNP expression.
 PRNP_quartiles_log_metadata <- cbind(PRNP_quartiles_status, t(PRNP_quartiles_log_data)) 
 
 # Selecting metadata of primary GBMs classified as PRNP-High and PRNP-Low.
-PRNP_quartiles_metadata <- as.data.frame(t(GBM_primary_tumor_metadata)) %>% dplyr::select(rownames(PRNP_counts))
+PRNP_quartiles_metadata <- as.data.frame(t(pGBM_metadata_filt)) %>% dplyr::select(rownames(PRNP_counts))
 
 # Concatenating dataframes.
 PRNP_quartiles_log_metadata <- cbind(PRNP_quartiles_log_metadata, t(PRNP_quartiles_metadata)) 
@@ -261,7 +288,7 @@ groups.prnp.exp.hist <- ggplot(
     legend.text.align = 0
   )
 
-pdf(paste0(getwd(), "/results/TCGA/PRNP_distribution_PRNP-High_and_PRNP-Low_groups.pdf"), width = 7, height = 3)
+pdf(paste0(getwd(), "/results/TCGA-GBM/PRNP_distribution_PRNP-High_and_PRNP-Low_groups.pdf"), width = 7, height = 3)
 groups.prnp.exp.hist
 dev.off()
 
@@ -284,12 +311,12 @@ groups.prnp.idh <- ggplot(
   ) +
   scale_fill_manual(
     name = "IDH status",
-    values = c("#00BFC4", "#F8766D", "snow2"),
-    labels = c("IDH-mutant", "IDHwt", "Unclassified")
+    values = c("#F8766D"),
+    labels = c("IDHwt")
   ) +
   scale_x_discrete(labels = c(expression(italic("PRNP")^"low"), expression(italic("PRNP")^"high")))
 
-pdf(paste0(getwd(), "/results/TCGA/IDH_status_across_PRNP-High_and_PRNP-Low_groups.pdf"), width = 4, height = 4.5)
+pdf(paste0(getwd(), "/results/TCGA-GBM/IDH_status_across_PRNP-High_and_PRNP-Low_groups.pdf"), width = 4, height = 4.5)
 groups.prnp.idh
 dev.off()
 
@@ -317,7 +344,7 @@ groups.prnp.sub <- ggplot(
   ) +
   scale_x_discrete(labels = c(expression(italic("PRNP")^"low"), expression(italic("PRNP")^"high")))
 
-pdf(paste0(getwd(), "/results/TCGA/Subtypes_across_PRNP-High_and_PRNP-Low_groups.pdf"), width = 4, height = 4.5)
+pdf(paste0(getwd(), "/results/TCGA-GBM/Subtypes_across_PRNP-High_and_PRNP-Low_groups.pdf"), width = 4, height = 4.5)
 groups.prnp.sub
 dev.off()
 
@@ -354,18 +381,35 @@ res_shrunken <- lfcShrink(
   type = "normal"
 )
 
-# Keeping only statistically significant results.
-res_shrunken <- as.data.frame(res_shrunken)
-deg.sig <- res_shrunken[res_shrunken$padj <= 0.05,]
-write.csv(deg.sig, file = paste0(getwd(), "/results/TCGA/TCGA-GBM_DETs_padj005.csv"))
+deg.all <- as.data.frame(res_shrunken)
+deg.all <- deg.all %>% dplyr::filter(!is.na(padj))
+
+# Creating column with ENSEMBL IDs (without version identifier).
+deg.all$ensembl <- gsub("\\..*", "", rownames(deg.all))
+
+# Getting correspondence between ENSEMBL IDs and gene symbols.
+correspondence <- select(
+  org.Hs.eg.db, 
+  keys = deg.all$ensembl, 
+  columns = "SYMBOL", 
+  keytype = "ENSEMBL"
+)
+
+# Adding column with gene symbols.
+deg.all$gene_symbol <- correspondence$SYMBOL[match(deg.all$ensembl, correspondence$ENSEMBL)]
+deg.all$gene_symbol[is.na(deg.all$gene_symbol)] <- "Unknown"
 
 # Adding gene classification to complete dataframe.
-deg.all <- res_shrunken %>% mutate(classification = case_when(
+deg.all <- deg.all %>% mutate(classification = case_when(
   padj <= 0.05 & log2FoldChange > 0 ~ "Upregulated",
   padj <= 0.05 & log2FoldChange < 0 ~ "Downregulated",
   padj > 0.05 ~ "Non-significant",
   is.na(padj) ~ "Non-significant")
 )
+
+# Saving only statistically significant results.
+deg.sig <- deg.all %>% dplyr::filter(padj <= 0.05)
+write.csv(deg.sig, file = paste0(getwd(), "/results/TCGA-GBM/TCGA-GBM_DETs_padj005.csv"))
 
 labs <- c(
   paste0("Downregulated (n=", nrow(deg.all[deg.all$classification == "Downregulated",]), ")"),
@@ -376,12 +420,12 @@ labs <- c(
 #### @ FIGURE 1E (MAIN) @ ####
 # Volcano plot with differentially expressed transcripts. 
 volcano <- ggplot(
-  deg.all[rownames(deg.all) != "ENSG00000171867.17",],
+  deg.all[deg.all$gene_symbol != "PRNP",],
   aes(x = log2FoldChange, y = -log10(padj), color = classification)) +
   geom_point(size = 1) +
   theme_classic() +
   scale_color_manual(
-    values = c("blue", "lightgray", "red"),
+    values = c("royalblue1", "lightgray", "indianred2"),
     name = "",
     labels = labs) +
   xlab(expression(log[2]("Fold change"))) +
@@ -392,13 +436,15 @@ volcano <- ggplot(
     axis.title.x = element_text(size = 15),
     axis.title.y = element_text(size = 15),
     legend.text = element_text(size = 15),
-    legend.text.align = 0
+    legend.text.align = 0,
+    plot.title = element_text(size = 15, hjust = 0.5)
   ) + 
   guides(color = guide_legend(override.aes = list(size=5))) +
   geom_vline(xintercept = 0, linetype = "dashed") +
-  geom_hline(yintercept = -log10(0.05), linetype = "dashed")
+  geom_hline(yintercept = -log10(0.05), linetype = "dashed") +
+  ggtitle(expression(italic("PRNP")^"high"~italic("versus")~italic("PRNP")^"low"))
 
-pdf(paste0(getwd(), "/results/TCGA/volcano.pdf"), width = 8, height = 4)
+pdf(paste0(getwd(), "/results/TCGA-GBM/volcano.pdf"), width = 8, height = 4)
 volcano
 dev.off()
 
@@ -410,7 +456,6 @@ dev.off()
 # g:Profiler (this is a website where you can upload a gene list and get enrichment analysis results).
 
 gene_list <- deg.sig$log2FoldChange
-names(gene_list) <- gsub("\\..*", "", rownames(deg.sig))
 gene_list <- gene_list[!is.na(gene_list)]
 gene_list <- sort(gene_list, decreasing = TRUE)
 
@@ -427,7 +472,7 @@ gse <- gseGO(
   pAdjustMethod = "none"
 )
 
-write.csv(as.data.frame(gse@result), file = paste0(getwd(), "/results/TCGA/GSEA.csv"))
+write.csv(as.data.frame(gse@result), file = paste0(getwd(), "/results/TCGA-GBM/GSEA.csv"))
 
 #### @ FIGURE 1F (MAIN) @ ####
 # Will be a bar plot showing intracellular traffic and vesicle-related terms.
