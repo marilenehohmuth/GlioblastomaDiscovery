@@ -381,6 +381,9 @@ plot_correlations_with_prnp <- function(
 ###################################
 ###################################
 
+# Data downloaded from:
+# http://gbmseq.org
+
 ##########################################################
 #### Step 1: Loading and subsetting data for analysis ####
 ##########################################################
@@ -505,6 +508,9 @@ plot_correlations_with_prnp(
 #################################
 #################################
 
+# Data downloaded from:
+# https://singlecell.broadinstitute.org/single_cell/study/SCP393/single-cell-rna-seq-of-adult-and-pediatric-glioblastoma
+
 ##########################################################
 #### Step 1: Loading and subsetting data for analysis ####
 ##########################################################
@@ -626,6 +632,9 @@ plot_correlations_with_prnp(
 #---- Richards et al. dataset ----#
 ###################################
 ###################################
+
+# Data downloaded from:
+# https://singlecell.broadinstitute.org/single_cell/study/SCP503/gradient-of-developmental-and-injury-reponse-transcriptional-states-define-functional-vulnerabilities-underpinning-glioblastoma-heterogeneity
 
 ##########################################################
 #### Step 1: Loading and subsetting data for analysis ####
