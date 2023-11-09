@@ -15,7 +15,6 @@ library(edgeR)                    # 3.42.4
 library(DESeq2)                   # 1.40.2
 library(ggplot2)                  # 3.4.4
 library(dplyr)                    # 1.1.3
-library(Matrix)                   # 1.3-4 
 library(ggpubr)                   # 0.6.0
 library(biomaRt)                  # 2.56.1
 library(GSVA)                     # 1.48.2
