@@ -22,6 +22,7 @@ library(GSVA)                     # 1.48.2
 library(Hmisc)                    # 5.1_1
 library(RColorBrewer)             # 1.1_3
 library(clusterProfiler)          # 4.8.1
+library(org.Hs.eg.db)             # 3.17.0
 
 ################################
 #### Step 1: Data retrieval ####
