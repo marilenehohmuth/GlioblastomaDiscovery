@@ -8,19 +8,21 @@
 #### Loading packages ####
 ##########################
 
-library(TCGAbiolinks)             # 2.23.5 -> 2.24.3
-library(SummarizedExperiment)     # 1.20.0 -> 1.26.1
-library(edgeR)                    # 3.32.1 -> 3.38.4
-library(DESeq2)                   # ?      -> 1.36.0
-library(ggplot2)                  # 3.3.5 
-library(dplyr)                    # 1.0.7 
+# R 4.3.2
+library(TCGAbiolinks)             # 2.28.3
+library(SummarizedExperiment)     # 1.30.2
+library(edgeR)                    # 3.42.4
+library(DESeq2)                   # 1.40.2
+library(ggplot2)                  # 3.4.4
+library(dplyr)                    # 1.1.3
 library(Matrix)                   # 1.3-4 
-library(ggpubr)                   # 0.4.0
-library(biomaRt)                  # 2.46.3 
-library(GSVA)                     # 1.38.2
-library(Hmisc)                    #
-library(RColorBrewer)             #
- 
+library(ggpubr)                   # 0.6.0
+library(biomaRt)                  # 2.56.1
+library(GSVA)                     # 1.48.2
+library(Hmisc)                    # 5.1_1
+library(RColorBrewer)             # 1.1_3
+library(clusterProfiler)          # 4.8.1
+
 ################################
 #### Step 1: Data retrieval ####
 ################################
