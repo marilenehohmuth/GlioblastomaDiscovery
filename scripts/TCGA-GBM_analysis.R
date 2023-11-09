@@ -456,6 +456,7 @@ dev.off()
 # g:Profiler (this is a website where you can upload a gene list and get enrichment analysis results).
 
 gene_list <- deg.sig$log2FoldChange
+names(gene_list) <- deg.sig$ensembl
 gene_list <- gene_list[!is.na(gene_list)]
 gene_list <- sort(gene_list, decreasing = TRUE)
 
@@ -473,6 +474,32 @@ gse <- gseGO(
 )
 
 write.csv(as.data.frame(gse@result), file = paste0(getwd(), "/results/TCGA-GBM/GSEA.csv"))
+
+ego_up <- enrichGO(
+  gene = names(gene_list)[gene_list > 0],
+  OrgDb  = org.Hs.eg.db,
+  ont  = "ALL",
+  pAdjustMethod = "BH",
+  pvalueCutoff = 0.05,
+  qvalueCutoff  = 0.05,
+  keyType = "ENSEMBL",
+  readable = TRUE
+)
+
+write.csv(as.data.frame(ego_up@result), file = paste0(getwd(), "/results/TCGA-GBM/ORA_up.csv"))
+
+ego_down <- enrichGO(
+  gene = names(gene_list)[gene_list < 0],
+  OrgDb  = org.Hs.eg.db,
+  ont  = "ALL",
+  pAdjustMethod = "BH",
+  pvalueCutoff = 0.05,
+  qvalueCutoff  = 0.05,
+  keyType = "ENSEMBL",
+  readable = TRUE
+)
+
+write.csv(as.data.frame(ego_down@result), file = paste0(getwd(), "/results/TCGA-GBM/ORA_down.csv"))
 
 #### @ FIGURE 1F (MAIN) @ ####
 # Will be a bar plot showing intracellular traffic and vesicle-related terms.
