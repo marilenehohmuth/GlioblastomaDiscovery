@@ -1,3 +1,6 @@
+# conda env create -n r-env --file conda.yml
+# conda env update --name r-env --file conda.yml --prune 
+
 name: r-env
 
 channels:
@@ -27,4 +30,4 @@ dependencies:
   - bioconda::bioconductor-tcgabiolinks=2.28.3
   - bioconda::bioconductor-biomart=2.56.1
   - bioconda::bioconductor-gsva=1.48.2
-  - bioconda::bioconductor-org.hs.eg.db
+  - bioconda::bioconductor-org.hs.eg.db=3.17.0
