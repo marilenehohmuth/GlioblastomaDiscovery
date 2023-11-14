@@ -23,6 +23,7 @@ dependencies:
   - conda-forge::r-survminer=0.4.9
   - conda-forge::r-survival=3.5_7
   - conda-forge::r-maxstat=0.7_25
+  - conda-forge::r-rjava
   - bioconda::bioconductor-deseq2=1.40.2
   - bioconda::bioconductor-edger=3.42.4
   - bioconda::bioconductor-summarizedexperiment=1.30.2
