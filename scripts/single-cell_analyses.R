@@ -21,6 +21,25 @@ library(corrplot)                 # 0.92
 #### Defining some functions ####
 #################################
 
+filter_out_samples <- function(
+    mdata, # A metadata table where rows are cells and columns are cell metadata.
+    sample_column # Name of column in metadata table that contains sample IDs.
+) {
+
+    # Load sample information table.
+    sample_info <- read.csv(
+        paste0(getwd(), "/data/sample_info.csv"),
+        header = TRUE,
+        row.names = NULL
+    )
+
+    # Keep only samples marked as "YES" in sample information table.
+    mdata <- mdata[mdata[,sample_column] %in% sample_info$sample[sample_info$use_in_analyses == "YES"],]
+
+    # Return filtered metadata table.
+    return(mdata)
+}
+
 # process_cellrouter()
 # @ This function processes a given CellRouter object & saves the processed object to an output file.
 process_cellrouter <- function(
@@ -383,6 +402,7 @@ plot_correlations_with_prnp <- function(
 
 # Data downloaded from:
 # http://gbmseq.org
+# Cohort of 4 primary IDH1-negative glioblastomas.
 
 ##########################################################
 #### Step 1: Loading and subsetting data for analysis ####
@@ -405,14 +425,20 @@ metadata_darmanis <- read.csv(
     sep = " "
 )
 
-# Subset count data to keep only malignant cells.
-malignant_data_darmanis <- data_darmanis[,colnames(data_darmanis) %in% 
-    rownames(metadata_darmanis)[metadata_darmanis$Cluster_2d %in% c(1, 4, 11)]]
-
 # Subset metadata to keep only malignant cells.
 malignant_metadata_darmanis <- metadata_darmanis[metadata_darmanis$Cluster_2d %in% c(1, 4, 11),]
 
-# Convert count data data.frame to sparse matrix.
+# Filter out samples that should not be used for downstream analyses.
+malignant_metadata_darmanis <- filter_out_samples(
+    mdata = malignant_metadata_darmanis, 
+    sample_column = "Sample.name"
+)
+
+# Subset count data to keep only malignant cells & cells from samples that should be kept for
+# downstream analyses.
+malignant_data_darmanis <- data_darmanis %>% select(rownames(malignant_metadata_darmanis))
+
+# Convert count data dataframe to sparse matrix.
 malignant_data_sparse_darmanis <- as(as.matrix(malignant_data_darmanis), "sparseMatrix")
 
 #################################
@@ -533,11 +559,20 @@ metadata_neftel <- read.table(
     check.names = FALSE
 )
 
-# Subset count data to keep only malignant cells.
-malignant_data_neftel <- data_neftel[,colnames(data_neftel) %in% rownames(metadata_neftel)[metadata_neftel$CellAssignment == "Malignant"]]
-
+# Subset metadata to keep only malignant cells.
 malignant_metadata_neftel <- metadata_neftel[metadata_neftel$CellAssignment == "Malignant",]
 
+# Filter out samples that should not be used for downstream analyses.
+malignant_metadata_neftel <- filter_out_samples(
+    mdata = malignant_metadata_neftel, 
+    sample_column = "Sample"
+)
+
+# Subset count data to keep only malignant cells & cells from samples that should be kept for
+# downstream analyses.
+malignant_data_neftel <- data_neftel %>% select(rownames(malignant_metadata_neftel))
+
+# Convert count data dataframe to sparse matrix.
 malignant_data_sparse_neftel <- as(as.matrix(malignant_data_neftel), "sparseMatrix")
 
 #################################
@@ -659,10 +694,21 @@ GSC_and_whole_tumor_metadata <- read.table(
 rownames(GSC_and_whole_tumor_metadata) <- gsub('-', '.', rownames(GSC_and_whole_tumor_metadata))
 rownames(GSC_and_whole_tumor_metadata) <- gsub('GBM_', '', rownames(GSC_and_whole_tumor_metadata))
 
-malignant_data_richards <- GBM_44k_raw_data[,colnames(GBM_44k_raw_data) %in% rownames(GSC_and_whole_tumor_metadata)[GSC_and_whole_tumor_metadata$Sample.Type == "TUMOUR"]]
-
+# Subset metadata to keep only malignant cells.
 malignant_metadata_richards <- GSC_and_whole_tumor_metadata[GSC_and_whole_tumor_metadata$Sample.Type == "TUMOUR",]
 
+# Filter out samples that should not be used for downstream analyses.
+malignant_metadata_richards <- filter_out_samples(
+    mdata = malignant_metadata_richards, 
+    sample_column = "Sample"
+)
+
+# Subset count data to keep only malignant cells & cells from samples that should be kept for
+# downstream analyses.
+malignant_data_richards <- GBM_44k_raw_data[,colnames(GBM_44k_raw_data) %in% rownames(GSC_and_whole_tumor_metadata)[GSC_and_whole_tumor_metadata$Sample.Type == "TUMOUR"]]
+malignant_data_richards <- malignant_data_richards %>% select(rownames(malignant_metadata_richards))
+
+# Convert count data dataframe to sparse matrix.
 malignant_data_sparse_richards <- as(as.matrix(malignant_data_richards), "sparseMatrix")
 
 #################################
