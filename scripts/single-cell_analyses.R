@@ -21,17 +21,16 @@ library(corrplot)                 # 0.92
 #### Defining some functions ####
 #################################
 
+# Load sample information table.
+sample_info <- read.csv(
+    paste0(getwd(), "/data/sample_info.csv"),
+    header = TRUE,
+    row.names = NULL
+)
 filter_out_samples <- function(
     mdata, # A metadata table where rows are cells and columns are cell metadata.
     sample_column # Name of column in metadata table that contains sample IDs.
 ) {
-
-    # Load sample information table.
-    sample_info <- read.csv(
-        paste0(getwd(), "/data/sample_info.csv"),
-        header = TRUE,
-        row.names = NULL
-    )
 
     # Keep only samples marked as "YES" in sample information table.
     mdata <- mdata[mdata[,sample_column] %in% sample_info$sample[sample_info$use_in_analyses == "YES"],]
@@ -52,10 +51,8 @@ process_cellrouter <- function(
 
     cellrouter@assays$RNA@rawdata <- cellrouter@assays$RNA@rawdata[rownames(cellrouter@assays$RNA@ndata), colnames(cellrouter@assays$RNA@ndata)]
 
-    # Ensure row names in metadata table have the same order as row names in the sampTab slot of the RNA assay & add
-    # sample identification to the CellRouter object.
-    metadata <- metadata[rownames(cellrouter@assays$RNA@sampTab),]
-    cellrouter@assays$RNA@sampTab$samples <- metadata[,sample_column_id]
+    # Add sample IDs to the CellRouter object.
+    cellrouter@assays$RNA@sampTab$samples <- metadata[,sample_column_id][match(rownames(cellrouter@assays$RNA@sampTab), rownames(metadata))]
 
     # Normalize count data if not yet normalized.
     if(normalized == FALSE) {
@@ -410,7 +407,7 @@ plot_correlations_with_prnp <- function(
 
 # Load Darmanis et al count data.
 data_darmanis <- read.csv(
-    "data/darmanis/GBM_raw_gene_counts.csv",
+    paste0(getwd(), "/data/darmanis/GBM_raw_gene_counts.csv"),
     header = TRUE,
     row.names = 1,
     sep = " ",
@@ -419,7 +416,7 @@ data_darmanis <- read.csv(
 
 # Load Darmanis et al metadata.
 metadata_darmanis <- read.csv(
-    "data/darmanis/GBM_metadata.csv",
+    paste0(getwd(), "/data/darmanis/GBM_metadata.csv"),
     header = TRUE,
     row.names = 1,
     sep = " "
@@ -438,8 +435,6 @@ malignant_metadata_darmanis <- filter_out_samples(
 # downstream analyses.
 malignant_data_darmanis <- data_darmanis %>% select(rownames(malignant_metadata_darmanis))
 
-# Convert count data dataframe to sparse matrix.
-malignant_data_sparse_darmanis <- as(as.matrix(malignant_data_darmanis), "sparseMatrix")
 
 #################################
 #### Step 2: Data processing ####
@@ -447,7 +442,7 @@ malignant_data_sparse_darmanis <- as(as.matrix(malignant_data_darmanis), "sparse
 
 # Create CellRouter object for Darmanis et al dataset.
 cellrouter_darmanis <- CreateCellRouter(
-    malignant_data_sparse_darmanis,
+    as.matrix(malignant_data_darmanis),
     min.genes = 0,
     min.cells = 0,
     is.expr = 0
