@@ -13,8 +13,8 @@ library(Matrix)                   # 1.3-4
 library(RColorBrewer)             # 1.1-2
 library(Hmisc)                    # 4.5-0
 library(corrplot)                 # 0.92
-library(stringr)
-
+library(stringr)                  # 1.5.0
+library(doParallel)               # 1.0.17
 
 ## Defining some functions -------------------------------------------------
 
