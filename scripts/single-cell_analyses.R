@@ -106,7 +106,7 @@ plot_prnp_across_samples <- function(
     
     # Save plot to output file.
     pdf(
-        "results/", dataset, "/", str_to_title(dataset), "_PRNP_expression_across_samples_boxplot.pdf",
+        paste0("results/", dataset, "/", str_to_title(dataset), "_PRNP_expression_across_samples_boxplot.pdf"),
         width = plot_width,
         height = plot_height
     )
@@ -187,7 +187,7 @@ plot_prnp_umap <- function(
 
     # Save plot to output file.
     pdf(
-        "results/", dataset, "/", str_to_title(dataset), "_PRNP_expression_across_cells_UMAP_plot.pdf",
+        paste0("results/", dataset, "/", str_to_title(dataset), "_PRNP_expression_across_cells_UMAP_plot.pdf"),
         width = plot_width,
         height = plot_height
     )
@@ -227,7 +227,7 @@ plot_sample_umap <- function(
 
     # Save plot to output file.
     pdf(
-        "results/", dataset, "/", str_to_title(dataset), "_samples_UMAP_plot.pdf",
+        paste0("results/", dataset, "/", str_to_title(dataset), "_samples_UMAP_plot.pdf"),
         width = plot_width,
         height = plot_height
     )
@@ -283,7 +283,7 @@ plot_signature_volcano <- function(
 
     # Save plot to output file.
     pdf(
-        "results/", dataset, "/", str_to_title(dataset), "_Correlation_PRNPvsAllGenes_plot.pdf",
+        paste0("results/", dataset, "/", str_to_title(dataset), "_Correlation_PRNPvsAllGenes_plot.pdf"),
         width = plot_width,
         height = plot_height
     )
