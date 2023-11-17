@@ -649,7 +649,7 @@ plot_correlations_with_prnp(
 ## Step 1: Loading and subsetting data for analysis ------------------------
 
 GBM_44k_raw_data <- read.csv(
-    "data/richards/Richards_NatureCancer_GBM_scRNAseq_counts.csv",
+    "data/richards/Richards_NatureCancer_GBM_scRNAseq_counts.csv.gz",
     header = TRUE,
     row.names = 1,
     sep = ",",
