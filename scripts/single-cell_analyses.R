@@ -355,7 +355,7 @@ get_correlations_with_prnp <- function(
 # @ This function uses get_correlations_with_prnp()'s output to create a correlation plot.
 plot_correlations_with_prnp <- function(
     df, # Dataframe as output by get_correlations_with_prnp().
-    dataset # Dataset name.
+    dataset, # Dataset name.
     plot_width, # Width for correlation plot.
     plot_height # Height for correlation plot.
 ) {
@@ -382,7 +382,7 @@ plot_correlations_with_prnp <- function(
 
     # Save plot to output file.
     pdf(
-        "results/", dataset, "/", str_to_title(dataset), "_Correlation_PRNPvsAllGenes_plot.pdf",
+        paste0("results/", dataset, "/", str_to_title(dataset), "_Correlation_PRNPvsAllGenes_plot.pdf"),
         width = plot_width,
         height = plot_height
     )
