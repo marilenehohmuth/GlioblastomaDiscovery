@@ -526,7 +526,7 @@ plot_correlations_with_prnp(
 
 # Load Neftel et al count data.
 data_neftel <- read.table(
-    "data/neftel/IDHwtGBM.processed.SS2.logTPM.txt",
+    "data/neftel/IDHwtGBM.processed.SS2.logTPM.txt.gz",
     header = TRUE,
     row.names = 1,
     sep = "\t",
