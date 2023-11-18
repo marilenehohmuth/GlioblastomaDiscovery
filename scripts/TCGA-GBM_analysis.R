@@ -470,7 +470,7 @@ gse <- gseGO(
   pvalueCutoff = 0.05, 
   verbose = TRUE, 
   OrgDb = org.Hs.eg.db, 
-  pAdjustMethod = "none"
+  pAdjustMethod = "BH"
 )
 
 write.csv(as.data.frame(gse@result), file = paste0(getwd(), "/results/TCGA-GBM/GSEA.csv"))
