@@ -5,6 +5,6 @@
 data/*
 MANIFEST.txt
 GDCdata/*
-#results/**/*.csv
+results/**/*.RDS
 results/**/*.R
 fusca_1.2.1.tar.gz
