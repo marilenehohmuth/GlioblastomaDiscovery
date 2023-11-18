@@ -360,7 +360,7 @@ plot_correlations_with_prnp <- function(
     # Create plot.
     plot <- ggplot(
         df,
-        aes(x = rownames(df), y = correlation, color = status)
+        aes(x = (rownames(df)), y = as.numeric(correlation), color = status)
     ) +
         geom_point() +
         theme_bw() +
@@ -389,13 +389,11 @@ plot_correlations_with_prnp <- function(
 }
 
 
-
-
 # Darmanis et al. dataset -------------------------------------------------
+
 
 # Data downloaded from:
 # http://gbmseq.org
-# Cohort of 4 primary IDH1-negative glioblastomas.
 
 
 ## Step 1: Loading and subsetting data for analysis ------------------------
@@ -430,7 +428,6 @@ malignant_metadata_darmanis <- filter_out_samples(
 # downstream analyses.
 malignant_data_darmanis <- data_darmanis %>% select(rownames(malignant_metadata_darmanis))
 
-
 ## Step 2: Data processing -------------------------------------------------
 
 # Create CellRouter object for Darmanis et al dataset.
@@ -458,7 +455,6 @@ plot_prnp_across_samples(
     plot_width = 5,
     plot_height = 5
 )
-
 
 ## Step 3: Establishing groups with distinct PRNP levels -------------------
 
@@ -496,7 +492,6 @@ markers_darmanis <- get_signatures(
 # Currently not used in the manuscript.
 # plot_signature_volcano(markers_darmanis, "darmanis")
 
-
 ## Step 5: Correlation analysis --------------------------------------------
 
 df_darmanis <- get_correlations_with_prnp(
@@ -513,8 +508,6 @@ plot_correlations_with_prnp(
 )
 
 
-
-
 # Neftel et al. dataset ---------------------------------------------------
 
 
@@ -526,7 +519,7 @@ plot_correlations_with_prnp(
 
 # Load Neftel et al count data.
 data_neftel <- read.table(
-    "data/neftel/IDHwtGBM.processed.SS2.logTPM.txt",
+    paste0(getwd(), "/data/neftel/IDHwtGBM.processed.SS2.logTPM.txt"),
     header = TRUE,
     row.names = 1,
     sep = "\t",
@@ -535,7 +528,7 @@ data_neftel <- read.table(
 
 # Load Neftel et al metadata.
 metadata_neftel <- read.table(
-    "data/neftel/IDHwt.GBM.Metadata.SS2.txt",
+    paste0(getwd(), "/data/neftel/IDHwt.GBM.Metadata.SS2.txt"),
     header = TRUE,
     row.names = 1,
     sep = "\t",
@@ -557,7 +550,6 @@ malignant_data_neftel <- data_neftel %>% select(rownames(malignant_metadata_neft
 
 # Convert count data dataframe to sparse matrix.
 malignant_data_sparse_neftel <- as(as.matrix(malignant_data_neftel), "sparseMatrix")
-
 
 ## Step 2: Data processing -------------------------------------------------
 
@@ -613,7 +605,6 @@ plot_sample_umap(
     plot_height = 5
 )
 
-
 ## Step 4: Finding signatures of PRNP+ and PRNP- cells ---------------------
 
 markers_neftel <- get_signatures(
@@ -640,16 +631,17 @@ plot_correlations_with_prnp(
 )
 
 
-
 # Richards et al. dataset -------------------------------------------------
+
 
 # Data downloaded from:
 # https://singlecell.broadinstitute.org/single_cell/study/SCP503/gradient-of-developmental-and-injury-reponse-transcriptional-states-define-functional-vulnerabilities-underpinning-glioblastoma-heterogeneity
 
+
 ## Step 1: Loading and subsetting data for analysis ------------------------
 
 GBM_44k_raw_data <- read.csv(
-    "data/richards/Richards_NatureCancer_GBM_scRNAseq_counts.csv",
+    paste0(getwd(), "/data/richards/Richards_NatureCancer_GBM_scRNAseq_counts.csv"),
     header = TRUE,
     row.names = 1,
     sep = ",",
@@ -657,7 +649,7 @@ GBM_44k_raw_data <- read.csv(
 )
 
 GSC_and_whole_tumor_metadata <- read.table(
-    "data/richards/GSCs_Tumour_MetaData.txt",
+    paste0(getwd(), "data/richards/GSCs_Tumour_MetaData.txt"),
     header = TRUE,
     row.names = 1,
     sep = "\t",
