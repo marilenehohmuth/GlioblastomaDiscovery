@@ -5,5 +5,5 @@
 data/*
 MANIFEST.txt
 GDCdata/*
-results/**/*.csv
+#results/**/*.csv
 results/**/*.R
