@@ -126,22 +126,31 @@ saveRDS(pGBM_log_metadata, file = paste0(getwd(), "/results/TCGA-GBM/PrimaryGBMs
 # Plotting PRNP levels across IDH-WT and IDH-mutant primary GBMs.
 pGBM.idh.prnp <- ggplot(
   pGBM_log_metadata,
-  aes(x = paper_IDH.status, y = ENSG00000171867.17, fill = paper_IDH.status)
+  aes(x = paper_IDH.status, y = ENSG00000171867.17)
 ) +
-  geom_violin(scale = "width") +
-  geom_boxplot(width = 0.25, outlier.shape = NA) +
-  theme_classic() +
+  geom_violin(aes(fill = paper_IDH.status), scale = "width") +
+  geom_boxplot(width = 0.25, outlier.shape = NA, fill = "white") +
+  theme_bw() +
   theme(
-    legend.position = "none",
-    axis.text.x = element_text(angle = 20, vjust = 1, hjust = 1, size = 15),
-    axis.text.y = element_text(size = 15),
-    axis.title.y = element_text(size = 15)
+    axis.text.x = element_blank(),
+    axis.text.y = element_text(size = 10),
+    axis.title.x = element_blank(),
+    axis.title.y = element_text(size = 12),
+    axis.ticks.x = element_blank(),
+    legend.position = "right",
+    legend.text = element_text(size = 8),
+    legend.title = element_text(size = 10)
   ) +
-  xlab(NULL) +
-  ggtitle("Primary GBMs") +
-  ylab(expression(paste(italic("PRNP"), " expression"))) +
-  scale_x_discrete(labels = c("IDH-mutant", "IDHwt", "Unclassified")) +
-  scale_fill_manual(values = c("#00BFC4", "#F8766D", "#E5E0E4")) +
+  ylab(expression("Normalized"~italic("PRNP")~"expression")) +
+  scale_fill_manual(
+    name = "IDH status",
+    values = c("#00BFC4", "#F8766D", "#E5E0E4"),
+    labels = c(
+      paste0("IDH-mutant (n=", nrow(pGBM_log_metadata[pGBM_log_metadata$paper_IDH.status == "Mutant",]), ")"), 
+      paste0("IDHwt (n=", nrow(pGBM_log_metadata[pGBM_log_metadata$paper_IDH.status == "WT",]), ")"),
+      paste0("Unclassified (n=", nrow(pGBM_log_metadata[is.na(pGBM_log_metadata$paper_IDH.status),]), ")")
+    )
+  ) +
   stat_compare_means( # Kruskal-Wallis test
     label = "p.format",
     label.y.npc = "bottom",
@@ -149,7 +158,11 @@ pGBM.idh.prnp <- ggplot(
     size = 4
   ) 
 
-pdf(paste0(getwd(), "/results/TCGA-GBM/PRNP_expression_GBM_Mutant_WT.pdf"), width = 4, height = 6)
+pdf(
+  paste0(getwd(), "/results/TCGA-GBM/TCGA-GBM_primaryTumours_PRNP_expression_perIDHstatus.pdf"), 
+  width = 5, 
+  height = 3
+)
 pGBM.idh.prnp
 dev.off()
 
@@ -157,33 +170,50 @@ dev.off()
 # Plotting PRNP levels across primary GBM subtypes.
 pGBM.sub.prnp <- ggplot(
   pGBM_log_metadata,
-  aes(x = paper_Transcriptome.Subtype_clean, y = ENSG00000171867.17, fill = paper_Transcriptome.Subtype_clean)
+  aes(x = paper_Transcriptome.Subtype_clean, y = ENSG00000171867.17)
 ) + 
-  geom_violin(scale = "width") +
-  geom_boxplot(width = 0.25, outlier.shape = NA) +
-  theme_classic() +
+  geom_violin(aes(fill = paper_Transcriptome.Subtype_clean), scale = "width") +
+  geom_boxplot(width = 0.25, outlier.shape = NA, fill = "white") +
+  theme_bw() +
   theme(
-    legend.position = "none",
-    axis.text.x = element_text(angle = 20, vjust = 1, hjust = 1, size = 15),
-    axis.text.y = element_text(size = 15)
+    axis.text.x = element_blank(),
+    axis.text.y = element_text(size = 10),
+    axis.title.x = element_blank(),
+    axis.title.y = element_text(size = 12),
+    axis.ticks.x = element_blank(),
+    legend.position = "right",
+    legend.text = element_text(size = 8),
+    legend.title = element_text(size = 10)
   ) +
   xlab(NULL) +
-  ylab(NULL) + 
-  stat_compare_means(
+  ylab(expression("Normalized"~italic("PRNP")~"expression")) + 
+  stat_compare_means( # Kruskal-Wallis test
     label = "p.format",
     label.y.npc = "bottom",
     label.x.npc = "left",
     size = 4
   ) +
-  scale_x_discrete(labels = c("Classical", "Mesenchymal", "Proneural", "Unclassified")) +
-  scale_fill_manual(values = c("#F8766D", "#7CAE00", "#C77CFF", "#E5E0E4"))
+  scale_fill_manual(
+    name = "Transcriptional subtype",
+    values = c("#F8766D", "#7CAE00", "#C77CFF", "#E5E0E4"),
+    labels = c(
+      paste0("Classical (n=", nrow(pGBM_log_metadata[pGBM_log_metadata$paper_Transcriptome.Subtype_clean == "CL",]), ")"), 
+      paste0("Mesenchymal (n=", nrow(pGBM_log_metadata[pGBM_log_metadata$paper_Transcriptome.Subtype_clean == "ME",]), ")"),
+      paste0("Proneural (n=", nrow(pGBM_log_metadata[pGBM_log_metadata$paper_Transcriptome.Subtype_clean == "PN",]), ")"),
+      paste0("Unclassified (n=", nrow(pGBM_log_metadata[is.na(pGBM_log_metadata$paper_Transcriptome.Subtype_clean),]), ")")
+    )
+  )
 
-pdf(paste0(getwd(), "/results/TCGA-GBM/PRNP_expression_across_GBM_subtypes.pdf"), width = 5, height = 6)
+pdf(
+  paste0(getwd(), "/results/TCGA-GBM/TCGA-GBM_primaryTumours_PRNP_expression_perTranscriptionalSubtype.pdf"), 
+  width = 5, 
+  height = 3
+)
 pGBM.sub.prnp
 dev.off()
 
 #### @ FIGURE 1B, LEFT+RIGHT PANEL (MAIN) @ #### 
-pdf(paste0(getwd(), "/results/TCGA-GBM/arranged_plots_pGBM.pdf"), width = 8, height = 4)
+pdf(paste0(getwd(), "/results/TCGA-GBM/TCGA-GBM_primaryTumours_PRNP_expression_perIDHstatus_plus_perSubtype_arranged_plots.pdf"), width = 10, height = 3)
 cowplot::plot_grid(
   plotlist = list(pGBM.idh.prnp, pGBM.sub.prnp),
   align = "hv",
@@ -288,36 +318,12 @@ groups.prnp.exp.hist <- ggplot(
     legend.text.align = 0
   )
 
-pdf(paste0(getwd(), "/results/TCGA-GBM/PRNP_distribution_PRNP-High_and_PRNP-Low_groups.pdf"), width = 7, height = 3)
+pdf(
+  paste0(getwd(), "/results/TCGA-GBM/TCGA-GBM_PRNP-High_vs_PRNP-Low_PRNP_expression_histogram.pdf"), 
+  width = 7, 
+  height = 3
+)
 groups.prnp.exp.hist
-dev.off()
-
-#### @ FIGURE 1D, LEFT PANEL (MAIN) @ #### 
-# Proportion of IDH-WT, IDH-mutant and unclassified samples in the PRNP-High/Low groups.
-groups.prnp.idh <- ggplot(
-  PRNP_quartiles_log_metadata,
-  aes(x = reorder(PRNP_status, PRNP), fill = unlist(paper_IDH.status))
-) +
-  geom_bar(position = "fill", color = "black") +
-  theme_classic() +
-  xlab(NULL) +
-  ylab("Proportion") +
-  theme(
-    axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, size = 15),
-    axis.text.y = element_text(size = 15),
-    axis.title.y = element_text(size = 15),
-    legend.text = element_text(size = 12),
-    legend.title = element_text(size = 15)
-  ) +
-  scale_fill_manual(
-    name = "IDH status",
-    values = c("#F8766D"),
-    labels = c("IDHwt")
-  ) +
-  scale_x_discrete(labels = c(expression(italic("PRNP")^"low"), expression(italic("PRNP")^"high")))
-
-pdf(paste0(getwd(), "/results/TCGA-GBM/IDH_status_across_PRNP-High_and_PRNP-Low_groups.pdf"), width = 4, height = 4.5)
-groups.prnp.idh
 dev.off()
 
 #### @ FIGURE 1D, RIGHT PANEL (MAIN) @ #### 
@@ -344,7 +350,11 @@ groups.prnp.sub <- ggplot(
   ) +
   scale_x_discrete(labels = c(expression(italic("PRNP")^"low"), expression(italic("PRNP")^"high")))
 
-pdf(paste0(getwd(), "/results/TCGA-GBM/Subtypes_across_PRNP-High_and_PRNP-Low_groups.pdf"), width = 4, height = 4.5)
+pdf(
+  paste0(getwd(), "/results/TCGA-GBM/TCGA-GBM_PRNP-High_vs_PRNP-Low_composition_subtypes.pdf"), 
+  width = 4, 
+  height = 4.5
+)
 groups.prnp.sub
 dev.off()
 
@@ -409,7 +419,7 @@ deg.all <- deg.all %>% mutate(classification = case_when(
 
 # Saving only statistically significant results.
 deg.sig <- deg.all %>% dplyr::filter(padj <= 0.05)
-write.csv(deg.sig, file = paste0(getwd(), "/results/TCGA-GBM/TCGA-GBM_DETs_padj005.csv"))
+write.csv(deg.sig, file = paste0(getwd(), "/results/TCGA-GBM/TCGA-GBM_PRNP-High_vs_PRNP-Low_DETs_padj0.05.csv"))
 
 labs <- c(
   paste0("Downregulated (n=", nrow(deg.all[deg.all$classification == "Downregulated",]), ")"),
@@ -422,7 +432,7 @@ labs <- c(
 volcano <- ggplot(
   deg.all[deg.all$gene_symbol != "PRNP",],
   aes(x = log2FoldChange, y = -log10(padj), color = classification)) +
-  geom_point(size = 1) +
+  geom_point(size = 1, alpha = 0.5) +
   theme_classic() +
   scale_color_manual(
     values = c("royalblue1", "lightgray", "indianred2"),
@@ -444,22 +454,23 @@ volcano <- ggplot(
   geom_hline(yintercept = -log10(0.05), linetype = "dashed") +
   ggtitle(expression(italic("PRNP")^"high"~italic("versus")~italic("PRNP")^"low"))
 
-pdf(paste0(getwd(), "/results/TCGA-GBM/volcano.pdf"), width = 8, height = 4)
+pdf(paste0(getwd(), "/results/TCGA-GBM/TCGA-GBM_PRNP-High_vs_PRNP-Low_volcano.pdf"), width = 8, height = 4)
 volcano
 dev.off()
 
-#####################################################
-#### Step 9: Doing gene set enrichment analysis  ####
-#####################################################
+#######################################
+#### Step 9: Functional profiling  ####
+#######################################
 
-# Need to add over-representation analysis or GSEA with clusterProfiler inside R to remove external dependency on 
-# g:Profiler (this is a website where you can upload a gene list and get enrichment analysis results).
+#### GSEA ####
 
+# Get ranked gene list.
 gene_list <- deg.sig$log2FoldChange
 names(gene_list) <- deg.sig$ensembl
 gene_list <- gene_list[!is.na(gene_list)]
 gene_list <- sort(gene_list, decreasing = TRUE)
 
+# Perform Gene Set Enrichment Analysis (GSEA).
 gse <- gseGO(
   geneList = gene_list, 
   ont = "ALL", 
@@ -472,34 +483,107 @@ gse <- gseGO(
   OrgDb = org.Hs.eg.db, 
   pAdjustMethod = "BH"
 )
+gse <- as.data.frame(gse@result)
 
-write.csv(as.data.frame(gse@result), file = paste0(getwd(), "/results/TCGA-GBM/GSEA.csv"))
-
-ego_up <- enrichGO(
-  gene = names(gene_list)[gene_list > 0],
-  OrgDb  = org.Hs.eg.db,
-  ont  = "ALL",
-  pAdjustMethod = "BH",
-  pvalueCutoff = 0.05,
-  qvalueCutoff  = 0.05,
-  keyType = "ENSEMBL",
-  readable = TRUE
+# Save GSEA results to output file.
+write.csv(
+  gse, 
+  file = paste0(getwd(), "/results/TCGA-GBM/TCGA-GBM_PRNP-High_vs_PRNP-Low_GSEA_padj0.05_BH_correctionMethod.csv")
 )
 
-write.csv(as.data.frame(ego_up@result), file = paste0(getwd(), "/results/TCGA-GBM/ORA_up.csv"))
-
-ego_down <- enrichGO(
-  gene = names(gene_list)[gene_list < 0],
-  OrgDb  = org.Hs.eg.db,
-  ont  = "ALL",
-  pAdjustMethod = "BH",
-  pvalueCutoff = 0.05,
-  qvalueCutoff  = 0.05,
-  keyType = "ENSEMBL",
-  readable = TRUE
+terms <- c(
+  "immunoglobulin complex",
+  "immune response",
+  "motile cilium",
+  "ciliary plasm",
+  "external side of plasma membrane",
+  "cilium movement",
+  "microtubule bundle formation",
+  "plasma membrane bounded cell projection assembly",
+  "cell projection assembly",
+  "positive regulation of epidermal growth factor receptor signaling pathway",
+  "inner dynein arm assembly",
+  "positive regulation of epidermal growth factor-activated receptor activity",
+  "extracellular matrix",
+  "extracellular region",
+  "synaptic vesicle membrane",
+  "exocytic vesicle membrane",
+  "cell periphery",
+  "plasma membrane",
+  "double-strand break repair via homologous recombination",
+  "regulation of cell cycle phase transition",
+  "double-strand break repair",
+  "DNA damage response",
+  "cell division",
+  "cell cycle checkpoint signaling",
+  "negative regulation of cell cycle process",
+  "DNA repair",
+  "neuron differentiation",
+  "chromosome organization"
 )
-
-write.csv(as.data.frame(ego_down@result), file = paste0(getwd(), "/results/TCGA-GBM/ORA_down.csv"))
 
 #### @ FIGURE 1F (MAIN) @ ####
-# Will be a bar plot showing intracellular traffic and vesicle-related terms.
+pdf(
+  paste0(getwd(), "/results/TCGA-GBM/TCGA-GBM_PRNP-High_vs_PRNP-Low_GSEA_padj0.05_BH_correctionMethod_SelectedTerms.pdf"), 
+  width = 10, 
+  height = 8
+)
+ggplot(
+  gse[gse$Description %in% terms,],
+  aes(x = NES, y = reorder(Description, NES), fill = -log10(p.adjust), size = setSize)
+) +
+  geom_point(shape = 21, color = "black") +
+  theme_bw() +
+  theme(
+    axis.text = element_text(size = 10),
+    axis.title = element_text(size = 12),
+    plot.title = element_text(size = 12, face = "bold", hjust = 0.5)
+  ) +
+  xlab("Normalized enrichment scores (NES)") +
+  ylab("Gene Ontology (GO) term") +
+  scale_fill_gradientn(
+    colors = colorRampPalette(brewer.pal(5, "Reds"))(100),
+    name = expression(-log[10]~"(Adjusted p-value)")
+  ) +
+  scale_size_continuous(range = c(1,5), name = "# Genes") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  ggtitle(expression("GSEA -"~italic("PRNP")^"high"~italic("versus")~italic("PRNP")^"low"))
+dev.off()
+
+#### ORA ####
+
+# Perform Over-Representation Analysis (ORA) on upregulated transcripts.
+ego_up <- enrichGO(
+  gene = names(gene_list)[gene_list > 0],
+  OrgDb = org.Hs.eg.db,
+  ont = "ALL",
+  pAdjustMethod = "BH",
+  pvalueCutoff = 0.05,
+  qvalueCutoff = 0.05,
+  keyType = "ENSEMBL",
+  readable = TRUE
+)
+
+# Save ORA results to output file.
+write.csv(
+  as.data.frame(ego_up@result), 
+  file = paste0(getwd(), "/results/TCGA-GBM/TCGA-GBM_PRNP-High_vs_PRNP-Low_ORA_upregulated_transcripts_padj0.05_BH_correctionMethod.csv")
+)
+
+# Perform Over-Representation Analysis (ORA) on downregulated transcripts.
+ego_down <- enrichGO(
+  gene = names(gene_list)[gene_list < 0],
+  OrgDb = org.Hs.eg.db,
+  ont = "ALL",
+  pAdjustMethod = "BH",
+  pvalueCutoff = 0.05,
+  qvalueCutoff = 0.05,
+  keyType = "ENSEMBL",
+  readable = TRUE
+)
+
+# Save ORA results to output file.
+write.csv(
+  as.data.frame(ego_down@result), 
+  file = paste0(getwd(), "/results/TCGA-GBM/TCGA-GBM_PRNP-High_vs_PRNP-Low_ORA_downregulated_transcripts_padj0.05_BH_correctionMethod.csv")
+)
