@@ -84,7 +84,7 @@ GBM_primary_tumor_metadata <- GBM_primary_tumor_metadata %>% dplyr::mutate(
 )
 
 # Filtering raw count data according to the metadata above.
-GBM_primary_tumor_count_data <- GBM_count_data %>% dplyr::dplyr::select(
+GBM_primary_tumor_count_data <- GBM_count_data %>% dplyr::select(
   intersect(rownames(GBM_primary_tumor_metadata), colnames(GBM_count_data))
 )
 
