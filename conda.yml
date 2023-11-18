@@ -1,5 +1,5 @@
 # conda env create -n r-env --file conda.yml
-# conda env update --name r-env --file conda.yml --prune 
+# conda env update --name r-env --file conda.yml
 
 name: r-env
 
@@ -23,7 +23,10 @@ dependencies:
   - conda-forge::r-survminer=0.4.9
   - conda-forge::r-survival=3.5_7
   - conda-forge::r-maxstat=0.7_25
-  - conda-forge::r-rjava
+  - conda-forge::r-rjava=1.0_6
+  - conda-forge::r-remotes=2.4.2.1
+  - conda-forge::r-doparallel=1.0.17
+  - conda-forge::r-irlba=2.3.5.1
   - bioconda::bioconductor-deseq2=1.40.2
   - bioconda::bioconductor-edger=3.42.4
   - bioconda::bioconductor-summarizedexperiment=1.30.2
@@ -32,3 +35,5 @@ dependencies:
   - bioconda::bioconductor-biomart=2.56.1
   - bioconda::bioconductor-gsva=1.48.2
   - bioconda::bioconductor-org.hs.eg.db=3.17.0
+  - bioconda::bioconductor-org.mm.eg.db=3.17.0
+  - bioconda::r-venndiagram
