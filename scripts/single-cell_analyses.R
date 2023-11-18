@@ -1,12 +1,10 @@
-# ANALYSIS OF SINGLE-CELL DATASETS ###########################################
+
+# ANALYSIS OF SINGLE-CELL DATASETS ----------------------------------------
+
 # @ This script generates the plots present in the second main figure of the # 
 # @ manuscript + supplemental material.                                      #
-##############################################################################
 
-
-##########################
-#### Loading packages ####
-##########################
+## Loading packages --------------------------------------------------------
 
 library(fusca)                    # 1.2.1
 library(ggplot2)                  # 3.3.5
@@ -15,11 +13,10 @@ library(Matrix)                   # 1.3-4
 library(RColorBrewer)             # 1.1-2
 library(Hmisc)                    # 4.5-0
 library(corrplot)                 # 0.92
+library(stringr)                  # 1.5.0
+library(doParallel)               # 1.0.17
 
-
-#################################
-#### Defining some functions ####
-#################################
+## Defining some functions -------------------------------------------------
 
 # Load sample information table.
 sample_info <- read.csv(
@@ -109,7 +106,7 @@ plot_prnp_across_samples <- function(
     
     # Save plot to output file.
     pdf(
-        "results/", dataset, "/", str_to_title(dataset), "_PRNP_expression_across_samples_boxplot.pdf",
+        paste0("results/", dataset, "/", str_to_title(dataset), "_PRNP_expression_across_samples_boxplot.pdf"),
         width = plot_width,
         height = plot_height
     )
@@ -190,7 +187,7 @@ plot_prnp_umap <- function(
 
     # Save plot to output file.
     pdf(
-        "results/", dataset, "/", str_to_title(dataset), "_PRNP_expression_across_cells_UMAP_plot.pdf",
+        paste0("results/", dataset, "/", str_to_title(dataset), "_PRNP_expression_across_cells_UMAP_plot.pdf"),
         width = plot_width,
         height = plot_height
     )
@@ -230,7 +227,7 @@ plot_sample_umap <- function(
 
     # Save plot to output file.
     pdf(
-        "results/", dataset, "/", str_to_title(dataset), "_samples_UMAP_plot.pdf",
+        paste0("results/", dataset, "/", str_to_title(dataset), "_samples_UMAP_plot.pdf"),
         width = plot_width,
         height = plot_height
     )
@@ -286,7 +283,7 @@ plot_signature_volcano <- function(
 
     # Save plot to output file.
     pdf(
-        "results/", dataset, "/", str_to_title(dataset), "_Correlation_PRNPvsAllGenes_plot.pdf",
+        paste0("results/", dataset, "/", str_to_title(dataset), "_Correlation_PRNPvsAllGenes_plot.pdf"),
         width = plot_width,
         height = plot_height
     )
@@ -355,7 +352,7 @@ get_correlations_with_prnp <- function(
 # @ This function uses get_correlations_with_prnp()'s output to create a correlation plot.
 plot_correlations_with_prnp <- function(
     df, # Dataframe as output by get_correlations_with_prnp().
-    dataset # Dataset name.
+    dataset, # Dataset name.
     plot_width, # Width for correlation plot.
     plot_height # Height for correlation plot.
 ) {
@@ -382,7 +379,7 @@ plot_correlations_with_prnp <- function(
 
     # Save plot to output file.
     pdf(
-        "results/", dataset, "/", str_to_title(dataset), "_Correlation_PRNPvsAllGenes_plot.pdf",
+        paste0("results/", dataset, "/", str_to_title(dataset), "_Correlation_PRNPvsAllGenes_plot.pdf"),
         width = plot_width,
         height = plot_height
     )
@@ -391,19 +388,17 @@ plot_correlations_with_prnp <- function(
 
 }
 
-###################################
-###################################
-#---- Darmanis et al. dataset ----#
-###################################
-###################################
+
+
+
+# Darmanis et al. dataset -------------------------------------------------
 
 # Data downloaded from:
 # http://gbmseq.org
 # Cohort of 4 primary IDH1-negative glioblastomas.
 
-##########################################################
-#### Step 1: Loading and subsetting data for analysis ####
-##########################################################
+
+## Step 1: Loading and subsetting data for analysis ------------------------
 
 # Load Darmanis et al count data.
 data_darmanis <- read.csv(
@@ -436,9 +431,7 @@ malignant_metadata_darmanis <- filter_out_samples(
 malignant_data_darmanis <- data_darmanis %>% select(rownames(malignant_metadata_darmanis))
 
 
-#################################
-#### Step 2: Data processing ####
-#################################
+## Step 2: Data processing -------------------------------------------------
 
 # Create CellRouter object for Darmanis et al dataset.
 cellrouter_darmanis <- CreateCellRouter(
@@ -466,9 +459,8 @@ plot_prnp_across_samples(
     plot_height = 5
 )
 
-###############################################################
-#### Step 3: Establishing groups with distinct PRNP levels ####
-###############################################################
+
+## Step 3: Establishing groups with distinct PRNP levels -------------------
 
 # Classifying cells as PRNP+ or PRNP-.
 cellrouter_darmanis <- add_prnp_status(cellrouter_darmanis)
@@ -494,9 +486,7 @@ plot_sample_umap(
     plot_height = 5
 )
 
-#############################################################
-#### Step 4: Finding signatures of PRNP+ and PRNP- cells ####
-#############################################################
+## Step 4: Finding signatures of PRNP+ and PRNP- cells ---------------------
 
 markers_darmanis <- get_signatures(
     cellrouter = cellrouter_darmanis, 
@@ -506,9 +496,8 @@ markers_darmanis <- get_signatures(
 # Currently not used in the manuscript.
 # plot_signature_volcano(markers_darmanis, "darmanis")
 
-######################################
-#### Step 5: Correlation analysis ####
-######################################
+
+## Step 5: Correlation analysis --------------------------------------------
 
 df_darmanis <- get_correlations_with_prnp(
     cellrouter = cellrouter_darmanis, 
@@ -523,18 +512,17 @@ plot_correlations_with_prnp(
     plot_height = 6
 )
 
-#################################
-#################################
-#---- Neftel et al. dataset ----#
-#################################
-#################################
+
+
+
+# Neftel et al. dataset ---------------------------------------------------
+
 
 # Data downloaded from:
 # https://singlecell.broadinstitute.org/single_cell/study/SCP393/single-cell-rna-seq-of-adult-and-pediatric-glioblastoma
 
-##########################################################
-#### Step 1: Loading and subsetting data for analysis ####
-##########################################################
+
+## Step 1: Loading and subsetting data for analysis ------------------------
 
 # Load Neftel et al count data.
 data_neftel <- read.table(
@@ -570,9 +558,8 @@ malignant_data_neftel <- data_neftel %>% select(rownames(malignant_metadata_neft
 # Convert count data dataframe to sparse matrix.
 malignant_data_sparse_neftel <- as(as.matrix(malignant_data_neftel), "sparseMatrix")
 
-#################################
-#### Step 2: Data processing ####
-#################################
+
+## Step 2: Data processing -------------------------------------------------
 
 # Create CellRouter object for Neftel et al dataset.
 cellrouter_neftel <- CreateCellRouter(
@@ -600,9 +587,7 @@ plot_prnp_across_samples(
     plot_height = 5
 )
 
-###############################################################
-#### Step 3: Establishing groups with distinct PRNP levels ####
-###############################################################
+## Step 3: Establishing groups with distinct PRNP levels -------------------
 
 # Classifying cells as PRNP+ or PRNP-.
 cellrouter_neftel <- add_prnp_status(cellrouter_neftel)
@@ -628,9 +613,8 @@ plot_sample_umap(
     plot_height = 5
 )
 
-#############################################################
-#### Step 4: Finding signatures of PRNP+ and PRNP- cells ####
-#############################################################
+
+## Step 4: Finding signatures of PRNP+ and PRNP- cells ---------------------
 
 markers_neftel <- get_signatures(
     cellrouter = cellrouter_neftel, 
@@ -640,9 +624,7 @@ markers_neftel <- get_signatures(
 # Currently not used in the manuscript.
 # plot_signature_volcano(markers_neftel, "neftel")
 
-######################################
-#### Step 5: Correlation analysis ####
-######################################
+## Step 5: Correlation analysis --------------------------------------------
 
 df_neftel <- get_correlations_with_prnp(
     cellrouter = cellrouter_neftel, 
@@ -657,18 +639,14 @@ plot_correlations_with_prnp(
     plot_height = 6
 )
 
-###################################
-###################################
-#---- Richards et al. dataset ----#
-###################################
-###################################
+
+
+# Richards et al. dataset -------------------------------------------------
 
 # Data downloaded from:
 # https://singlecell.broadinstitute.org/single_cell/study/SCP503/gradient-of-developmental-and-injury-reponse-transcriptional-states-define-functional-vulnerabilities-underpinning-glioblastoma-heterogeneity
 
-##########################################################
-#### Step 1: Loading and subsetting data for analysis ####
-##########################################################
+## Step 1: Loading and subsetting data for analysis ------------------------
 
 GBM_44k_raw_data <- read.csv(
     "data/richards/Richards_NatureCancer_GBM_scRNAseq_counts.csv",
@@ -706,9 +684,7 @@ malignant_data_richards <- malignant_data_richards %>% select(rownames(malignant
 # Convert count data dataframe to sparse matrix.
 malignant_data_sparse_richards <- as(as.matrix(malignant_data_richards), "sparseMatrix")
 
-#################################
-#### Step 2: Data processing ####
-#################################
+## Step 2: Data processing -------------------------------------------------
 
 # Create CellRouter object for Richards et al dataset.
 cellrouter_richards <- CreateCellRouter(
@@ -736,9 +712,7 @@ plot_prnp_across_samples(
     plot_height = 5
 )
 
-###############################################################
-#### Step 3: Establishing groups with distinct PRNP levels ####
-###############################################################
+## Step 3: Establishing groups with distinct PRNP levels -------------------
 
 # Classifying cells as PRNP+ or PRNP-.
 cellrouter_richards <- add_prnp_status(cellrouter_richards)
@@ -763,19 +737,15 @@ plot_sample_umap(
     plot_width = 5,
     plot_height = 5
 )
- 
-#############################################################
-#### Step 4: Finding signatures of PRNP+ and PRNP- cells ####
-#############################################################
+
+## Step 4: Finding signatures of PRNP+ and PRNP- cells ---------------------
 
 markers_richards <- get_signatures(cellrouter_richards, "richards")
 
 # Currently not used in the manuscript.
 # plot_signature_volcano(markers_richards, "richards")
 
-######################################
-#### Step 5: Correlation analysis ####
-######################################
+## Step 5: Correlation analysis --------------------------------------------
 
 df_richards <- get_correlations_with_prnp(cellrouter_richards, "richards")
 
@@ -787,6 +757,5 @@ plot_correlations_with_prnp(
     plot_height = 6
 )
  
-######################################
-
+# The End
 sessionInfo()
