@@ -421,7 +421,7 @@ do_gsea <- function(
     df <- df[df$population == population_,]
 
     # Filter out non-significant results.
-    df <- df[df$pvalue <= 0.05,]
+    df <- df[df$pval <= 0.05,]
 
     # Get ranked gene list.
     gene_list <- df$fc
@@ -776,11 +776,7 @@ plot_correlations_with_prnp(
 
 # Load Neftel et al count data.
 data_neftel <- read.table(
-<<<<<<< HEAD
-    "data/neftel/IDHwtGBM.processed.SS2.logTPM.txt.gz",
-=======
-    paste0(getwd(), "/data/neftel/IDHwtGBM.processed.SS2.logTPM.txt"),
->>>>>>> cb9dbb0da29d78456ae9f1d501ea5b6b329f12a5
+    paste0(getwd(), "/data/neftel/IDHwtGBM.processed.SS2.logTPM.txt.gz"),
     header = TRUE,
     row.names = 1,
     sep = "\t",
@@ -963,11 +959,7 @@ plot_correlations_with_prnp(
 ## Step 1: Loading and subsetting data for analysis ------------------------
 
 GBM_44k_raw_data <- read.csv(
-<<<<<<< HEAD
-    "data/richards/Richards_NatureCancer_GBM_scRNAseq_counts.csv.gz",
-=======
-    paste0(getwd(), "/data/richards/Richards_NatureCancer_GBM_scRNAseq_counts.csv"),
->>>>>>> cb9dbb0da29d78456ae9f1d501ea5b6b329f12a5
+    paste0(getwd(), "/data/richards/Richards_NatureCancer_GBM_scRNAseq_counts.csv.gz"),
     header = TRUE,
     row.names = 1,
     sep = ",",
@@ -1002,17 +994,13 @@ malignant_metadata_richards$Sample_clean <- sapply(1:nrow(malignant_metadata_ric
 # Filter out samples that should not be used for downstream analyses.
 malignant_metadata_richards <- filter_out_samples(
     mdata = malignant_metadata_richards, 
-<<<<<<< HEAD
-    sample_column = "Sample.ID"
-=======
     sample_column = "Sample_clean"
->>>>>>> cb9dbb0da29d78456ae9f1d501ea5b6b329f12a5
 )
 
 # Subset count data to keep only malignant cells & cells from samples that should be kept for
 # downstream analyses.
 malignant_data_richards <- GBM_44k_raw_data[,colnames(GBM_44k_raw_data) %in% rownames(GSC_and_whole_tumor_metadata)[GSC_and_whole_tumor_metadata$Sample.Type == "TUMOUR"]]
-malignant_data_richards <- malignant_data_richards %>% select(rownames(malignant_metadata_richards))
+malignant_data_richards <- malignant_data_richards %>% dplyr::select(rownames(malignant_metadata_richards))
 
 ## Step 2: Data processing -------------------------------------------------
 
@@ -1038,8 +1026,8 @@ cellrouter_richards <- process_cellrouter(
 plot_prnp_across_samples(
     cellrouter = cellrouter_richards,
     dataset = "richards",
-    plot_width = 15,
-    plot_height = 5
+    plot_width = 2.5,
+    plot_height = 3
 )
 
 ## Step 3: Establishing groups with distinct PRNP levels -------------------
@@ -1055,8 +1043,8 @@ dim.red.richards <- concatenate_data(cellrouter = cellrouter_richards)
 plot_prnp_umap(
     dim.red = dim.red.richards,
     dataset = "richards",
-    plot_width = 5,
-    plot_height = 5
+    plot_width = 4.5,
+    plot_height = 4
 )
 
 #### @ FIGURE S2A, RIGHT PANEL (SUPPLEMENTAL) @ #### 
@@ -1064,8 +1052,8 @@ plot_prnp_umap(
 plot_sample_umap(
     dim.red = dim.red.richards,
     dataset = "richards",
-    plot_width = 5,
-    plot_height = 5
+    plot_width = 4.5,
+    plot_height = 4
 )
 
 ## Step 4: Finding signatures of PRNP+ and PRNP- cells ---------------------
@@ -1229,7 +1217,6 @@ venn.diagram(
 
 # Find the intersection of all datasets.
 common_genes_positiveCorr_with_prnp <- Reduce(intersect, genes_positiveCorr_with_prnp)
-
 
 # The End
 sessionInfo()
