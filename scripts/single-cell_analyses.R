@@ -18,7 +18,7 @@ library(doParallel)               # 1.0.17
 library(clusterProfiler)          # 4.8.1
 library(org.Hs.eg.db)             # 3.17.0
 library(irlba)                    # 2.3.5.1
-library(VennDiagram)
+library(VennDiagram)              # 1.7.3
 
 ## Defining some functions -------------------------------------------------
 
@@ -805,14 +805,11 @@ malignant_metadata_neftel <- filter_out_samples(
 # downstream analyses.
 malignant_data_neftel <- data_neftel %>% dplyr::select(rownames(malignant_metadata_neftel))
 
-# Convert count data dataframe to sparse matrix.
-malignant_data_sparse_neftel <- as(as.matrix(malignant_data_neftel), "sparseMatrix")
-
 ## Step 2: Data processing -------------------------------------------------
 
 # Create CellRouter object for Neftel et al dataset.
 cellrouter_neftel <- CreateCellRouter(
-    malignant_data_sparse_neftel,
+    as.matrix(malignant_data_neftel),
     min.cells = 0,
     min.genes = 0,
     is.expr = 0
@@ -970,7 +967,7 @@ GBM_44k_raw_data <- read.csv(
 )
 
 GSC_and_whole_tumor_metadata <- read.table(
-    paste0(getwd(), "data/richards/GSCs_Tumour_MetaData.txt"),
+    paste0(getwd(), "/data/richards/GSCs_Tumour_MetaData.txt"),
     header = TRUE,
     row.names = 1,
     sep = "\t",
@@ -983,10 +980,21 @@ rownames(GSC_and_whole_tumor_metadata) <- gsub('GBM_', '', rownames(GSC_and_whol
 # Subset metadata to keep only malignant cells.
 malignant_metadata_richards <- GSC_and_whole_tumor_metadata[GSC_and_whole_tumor_metadata$Sample.Type == "TUMOUR",]
 
+# Create new sample column that matches the study's clinical metadata sample IDs.
+malignant_metadata_richards$Sample_clean <- sapply(1:nrow(malignant_metadata_richards), function(x) {
+    if(!grepl("-", malignant_metadata_richards$Sample.ID[x])) {
+        return(malignant_metadata_richards$Sample.ID[x])
+    } else {
+        sample_clean <- gsub("[-]([A-Z]).*", "", malignant_metadata_richards$Sample.ID[x])
+        sample_clean <- paste0(sample_clean, "_T")
+        return(sample_clean)
+    }    
+})
+
 # Filter out samples that should not be used for downstream analyses.
 malignant_metadata_richards <- filter_out_samples(
     mdata = malignant_metadata_richards, 
-    sample_column = "Sample"
+    sample_column = "Sample_clean"
 )
 
 # Subset count data to keep only malignant cells & cells from samples that should be kept for
@@ -994,14 +1002,11 @@ malignant_metadata_richards <- filter_out_samples(
 malignant_data_richards <- GBM_44k_raw_data[,colnames(GBM_44k_raw_data) %in% rownames(GSC_and_whole_tumor_metadata)[GSC_and_whole_tumor_metadata$Sample.Type == "TUMOUR"]]
 malignant_data_richards <- malignant_data_richards %>% select(rownames(malignant_metadata_richards))
 
-# Convert count data dataframe to sparse matrix.
-malignant_data_sparse_richards <- as(as.matrix(malignant_data_richards), "sparseMatrix")
-
 ## Step 2: Data processing -------------------------------------------------
 
 # Create CellRouter object for Richards et al dataset.
 cellrouter_richards <- CreateCellRouter(
-    malignant_data_sparse_richards, 
+    as.matrix(malignant_data_richards), 
     min.genes = 0,
     min.cells = 0,
     is.expr = 0
@@ -1012,7 +1017,7 @@ cellrouter_richards <- process_cellrouter(
     cellrouter = cellrouter_richards,
     metadata = malignant_metadata_richards,
     normalized = FALSE,
-    sample_column_id = "Sample",
+    sample_column_id = "Sample_clean",
     dataset = "richards"
 )
 
