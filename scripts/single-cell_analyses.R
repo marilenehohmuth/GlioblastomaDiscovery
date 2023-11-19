@@ -468,7 +468,7 @@ plot_gsea <- function(
     # Create dot plot with GSEA results.
     plot <- ggplot(
         gse[gse$Description %in% terms,],
-        aes(x = NES, y = reorder(Description, NES), fill = -log10(p.adjust), size = Count) 
+        aes(x = NES, y = reorder(Description, NES), fill = -log10(p.adjust), size = setSize) 
     ) +
         geom_point(shape = 21, color = "black") +
         theme_bw() +
@@ -507,7 +507,7 @@ do_ora <- function(
     df <- df[df$population == population_,]
 
     # Filter out non-significant results.
-    df <- df[df$pvalue <= 0.05,]
+    df <- df[df$pval <= 0.05,]
 
     # Get gene lists.
     gene_list <- list(
