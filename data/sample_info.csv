@@ -1,0 +1,44 @@
+dataset,sample,age_of_patient,age_category,type,IDH_status,use_in_analyses,comment
+Darmanis et al,BT_S1,55 yo,Adult,Primary,WT,YES,Supplemental information does not state if tumours are primary but the manuscript does say they are
+Darmanis et al,BT_S2,54 yo,Adult,Primary,NA,YES,Supplemental information does not state if tumours are primary but the manuscript says they are; Supplemental information says that IDH was not tested but manuscript says all tumours are IDH1-negative
+Darmanis et al,BT_S4,60 yo,Adult,Primary,WT,YES,Supplemental information does not state if tumours are primary but the manuscript does say they are
+Darmanis et al,BT_S6,48 yo,Adult,Primary,WT,YES,Supplemental information does not state if tumours are primary but the manuscript does say they are
+Neftel et al,MGH66,67 yo,Adult,Primary,WT,YES,
+Neftel et al,MGH100,71 yo,Adult,Primary,WT,YES,
+Neftel et al,MGH101,52 yo,Adult,Primary,WT,YES,
+Neftel et al,MGH102,65 yo,Adult,Primary,WT,YES,
+Neftel et al,MGH104,65 yo,Adult,Primary,WT,YES,
+Neftel et al,MGH105 A,67 yo,Adult,Primary,WT,YES,
+Neftel et al,MGH105 B,67 yo,Adult,Primary,WT,YES,
+Neftel et al,MGH105 C,67 yo,Adult,Primary,WT,YES,
+Neftel et al,MGH105 D,67 yo,Adult,Primary,WT,YES,
+Neftel et al,MGH106,66 yo,Adult,Primary,WT,YES,
+Neftel et al,MGH110,61 yo,Adult,Primary,WT,YES,
+Neftel et al,MGH113,65 yo,Adult,Primary,WT,YES,
+Neftel et al,MGH115,69 yo,Adult,Primary,WT,YES,
+Neftel et al,MGH121,63 yo,Adult,Primary,WT,YES,
+Neftel et al,MGH122,63 yo,Adult,Primary,WT,YES,
+Neftel et al,MGH124,68 yo,Adult,Primary,WT,YES,
+Neftel et al,MGH125,76 yo,Adult,Primary,WT,YES,
+Neftel et al,MGH126,65 yo,Adult,Primary,WT,YES,
+Neftel et al,MGH128,65 yo,Adult,Primary,WT,YES,
+Neftel et al,MGH129,78 yo,Adult,Primary,WT,YES,
+Neftel et al,MGH136,71 yo,Adult,Primary,WT,YES,
+Neftel et al,MGH143,62 yo,Adult,Primary,WT,YES,
+Neftel et al,MGH151,65 yo,Adult,Primary,WT,YES,
+Neftel et al,MGH152,52 yo,Adult,Primary,WT,YES,
+Neftel et al,MGH85,7 yo,Pedriatric,Recurrence,WT,NO,This sample is from pediatric origin and should not be included in the analyses; Sample is a recurrence
+Neftel et al,BT749,9 mo,Pedriatric,Primary,NA,NO,This sample is from pediatric origin and should not be included in the analyses
+Neftel et al,BT771,12 yo,Pedriatric,Primary,WT,NO,This sample is from pediatric origin and should not be included in the analyses
+Neftel et al,BT786,13 yo,Pedriatric,Recurrence,WT,NO,This sample is from pediatric origin and should not be included in the analyses; Sample is a recurrence
+Neftel et al,BT830,7 yo,Pedriatric,Primary,NA,NO,This sample is from pediatric origin and should not be included in the analyses
+Neftel et al,BT920,6 wo,Pedriatric,Primary,NA,NO,This sample is from pediatric origin and should not be included in the analyses
+Neftel et al,BT1160,11 yo,Pedriatric,Primary,WT,NO,This sample is from pediatric origin and should not be included in the analyses
+Neftel et al,BT1187,13 mo,Pedriatric,Recurrence,WT,NO,This sample is from pediatric origin and should not be included in the analyses; Sample is a recurrence
+Richards et al,G620_T,55 yo,Adult,Primary,IDH1_p.R100Q,NO,This sample is IDH1-mutant and should not be included in the analyses
+Richards et al,G945_T,NA,NA,Primary,NA,YES,It is not clear from the manuscript if this sample is an adult sample
+Richards et al,G946_T,NA,NA,Primary,NA,YES,It is not clear from the manuscript if this sample is an adult sample
+Richards et al,G910_T,NA,NA,Primary,NA,YES,It is not clear from the manuscript if this sample is an adult sample
+Richards et al,G967_T,NA,NA,Recurrence,NA,NO,It is not clear from the manuscript if this sample is an adult sample; Sample is a recurrence
+Richards et al,G983_T,NA,NA,Recurrence,NA,NO,It is not clear from the manuscript if this sample is an adult sample; Sample is a recurrence
+Richards et al,G1003_T,NA,NA,Primary,NA,YES,It is not clear from the manuscript if this sample is an adult sample
