@@ -673,7 +673,7 @@ malignant_metadata_richards <- GSC_and_whole_tumor_metadata[GSC_and_whole_tumor_
 # Filter out samples that should not be used for downstream analyses.
 malignant_metadata_richards <- filter_out_samples(
     mdata = malignant_metadata_richards, 
-    sample_column = "Sample"
+    sample_column = "Sample.ID"
 )
 
 # Subset count data to keep only malignant cells & cells from samples that should be kept for
