@@ -3,6 +3,7 @@
 .RData
 .Ruserdata
 data/*
+!data/sample_info.csv
 MANIFEST.txt
 GDCdata/*
 results/**/*.RDS
