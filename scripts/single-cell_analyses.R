@@ -15,6 +15,10 @@ library(Hmisc)                    # 4.5-0
 library(corrplot)                 # 0.92
 library(stringr)                  # 1.5.0
 library(doParallel)               # 1.0.17
+library(clusterProfiler)          # 4.8.1
+library(org.Hs.eg.db)             # 3.17.0
+library(irlba)                    # 2.3.5.1
+library(VennDiagram)              # 1.7.3
 
 ## Defining some functions -------------------------------------------------
 
@@ -93,15 +97,18 @@ plot_prnp_across_samples <- function(
     # Create boxplot.
     plot <- ggplot(
         expr,
-        aes(x = reorder(samples, PRNP), y = PRNP, fill = samples)
+        aes(x = reorder(samples, PRNP), y = PRNP)
     ) +
-        geom_boxplot(color = "antiquewhite4", outlier.colour = "antiquewhite4") +
+        geom_violin(aes(fill = samples), scale = "width") +
+        geom_boxplot(fill = "white", outlier.shape = NA, width = 0.1) +
         xlab("Sample") +
-        ylab("Normalized PRNP counts") +
+        ylab(expression("Normalized"~italic("PRNP")~"expression")) +
         theme_classic() +
         theme(
             legend.position = "none",
-            axis.text.x = element_text(size = 5, angle = 45, vjust = 1, hjust = 1)
+            axis.text.x = element_text(size = 8, angle = 45, vjust = 1, hjust = 1),
+            axis.text.y = element_text(size = 8),
+            axis.title = element_text(size = 12)
         )
     
     # Save plot to output file.
@@ -182,12 +189,13 @@ plot_prnp_umap <- function(
         ) +
         scale_color_gradientn(
             colors = colorRampPalette((brewer.pal(9, "RdPu")))(1000),
-            limits = c(min(dim.red$PRNP), max(dim.red$PRNP))
+            limits = c(min(dim.red$PRNP), max(dim.red$PRNP)),
+            name = expression(~italic("PRNP")~"expression  ")
         )
 
     # Save plot to output file.
     pdf(
-        paste0("results/", dataset, "/", str_to_title(dataset), "_PRNP_expression_across_cells_UMAP_plot.pdf"),
+        paste0(getwd(), "/results/", dataset, "/", str_to_title(dataset), "_PRNP_expression_across_cells_UMAP_plot.pdf"),
         width = plot_width,
         height = plot_height
     )
@@ -204,6 +212,12 @@ plot_sample_umap <- function(
     plot_width, # Width for UMAP plot.
     plot_height # Height for UMAP plot.
 ) {
+    # Get number of samples.
+    n_samples <- dim.red$samples %>% unique %>% length
+
+    # Define number of columns for plot legend.
+    n_cols <- 2 
+    if(n_samples >= 15) n_cols <- 8
 
     plot <- ggplot(
         dim.red,
@@ -221,13 +235,13 @@ plot_sample_umap <- function(
             override.aes = list(size=0.8),
             keywidth = 0,
             keyheight = 0,
-            ncol = 3,
+            ncol = n_cols,
             title = "Sample")
         )
 
     # Save plot to output file.
     pdf(
-        paste0("results/", dataset, "/", str_to_title(dataset), "_samples_UMAP_plot.pdf"),
+        paste0(getwd(), "/results/", dataset, "/", str_to_title(dataset), "_samples_UMAP_plot.pdf"),
         width = plot_width,
         height = plot_height
     )
@@ -248,11 +262,16 @@ get_signatures <- function(
         object = cellrouter,
         assay.type = "RNA",
         column = "PRNP_status",
-        test.use = "wilcox"
+        test.use = "wilcox",
+        pos.only = FALSE,
+        fc.threshold = 0
     )
 
     # Save results to output file.
-    write.csv(markers, file = paste0("results/", dataset, "/", str_to_title(dataset), "_PRNP+_vs_PRNP-_signature_marker_genes.csv"))
+    write.csv(
+        markers, 
+        file = paste0(getwd(), "/results/", dataset, "/", str_to_title(dataset), "_PRNP+_vs_PRNP-_signature_marker_genes.csv")
+    )
 
     # Return marker genes.
     return(markers)
@@ -283,7 +302,7 @@ plot_signature_volcano <- function(
 
     # Save plot to output file.
     pdf(
-        paste0("results/", dataset, "/", str_to_title(dataset), "_Correlation_PRNPvsAllGenes_plot.pdf"),
+        paste0(getwd(), "/results/", dataset, "/", str_to_title(dataset), "_Correlation_PRNPvsAllGenes_plot.pdf"),
         width = plot_width,
         height = plot_height
     )
@@ -342,7 +361,10 @@ get_correlations_with_prnp <- function(
     ))
 
     # Save filtered & classified results to output file.
-    write.csv(df, file = paste0("results/", dataset, "/", str_to_title(dataset), "_Correlation_PRNPvsAllGenes_filt_withStatus.csv"))
+    write.csv(
+        df, 
+        file = paste0(getwd(), "/results/", dataset, "/", str_to_title(dataset), "_Correlation_PRNPvsAllGenes_filt_withStatus.csv")
+    )
 
     # Return dataframe with correlations.
     return(df)
@@ -360,12 +382,12 @@ plot_correlations_with_prnp <- function(
     # Create plot.
     plot <- ggplot(
         df,
-        aes(x = rownames(df), y = correlation, color = status)
+        aes(x = as.numeric(rownames(df)), y = as.numeric(correlation), color = status)
     ) +
         geom_point() +
         theme_bw() +
         geom_hline(yintercept = 0, linetype = 'dotted') +
-        xlab("Genes") +
+        xlab("Ranked genes") +
         ylab("Pearson correlation") +
         scale_color_manual(values = c("royalblue1", "snow3", "indianred1"), name = "Status")  +
         ggtitle(paste0(str_to_title(dataset), " et al")) +
@@ -379,7 +401,7 @@ plot_correlations_with_prnp <- function(
 
     # Save plot to output file.
     pdf(
-        paste0("results/", dataset, "/", str_to_title(dataset), "_Correlation_PRNPvsAllGenes_plot.pdf"),
+        paste0(getwd(), "/results/", dataset, "/", str_to_title(dataset), "_Correlation_PRNPvsAllGenes_plot.pdf"),
         width = plot_width,
         height = plot_height
     )
@@ -388,14 +410,183 @@ plot_correlations_with_prnp <- function(
 
 }
 
+# do_gsea()
+# @ This function uses findSignatures()'s output to perform GSEA & save results to output csv file.
+do_gsea <- function(
+    df, # Dataframe containing findSignatures results.
+    dataset, # Dataset name.
+    population_ # Cell population name, as output by findSignatures.
+) {
+    # Select only cell population specified.
+    df <- df[df$population == population_,]
 
+    # Filter out non-significant results.
+    df <- df[df$pvalue <= 0.05,]
+
+    # Get ranked gene list.
+    gene_list <- df$fc
+    names(gene_list) <- df$gene
+    gene_list <- gene_list[!is.na(gene_list)]
+    gene_list <- sort(gene_list, decreasing = TRUE)
+
+    # Perform Gene Set Enrichment Analysis (GSEA) in the specified population.
+    gse <- gseGO(
+        geneList = gene_list, 
+        ont = "ALL", 
+        keyType = "SYMBOL", 
+        nPerm = 10000, 
+        minGSSize = 3, 
+        maxGSSize = 800, 
+        pvalueCutoff = 0.05, 
+        verbose = TRUE, 
+        OrgDb = org.Hs.eg.db, 
+        pAdjustMethod = "BH"
+    )   
+    gse <- as.data.frame(gse@result)
+
+    # Save GSEA results table to output file.
+    write.csv(
+        gse, 
+        file = paste0(getwd(), "/results/", dataset, "/", str_to_title(dataset), "_", population_, "_GSEA_gseGO_ontALL_padj0.05.csv")
+    )
+
+    # Return GSEA results table.
+    return(gse)
+}
+
+# plot_gsea()
+# @ This function uses gseGO()'s output to plot GSEA results, highlighting selected terms.
+plot_gsea <- function(
+    gse, # Dataframe containing gseGO results.
+    dataset, # Dataset name.
+    population_, # Cell population name used to perform GSEA with gseGO.
+    title, # Title for plot.
+    terms, # Terms to highlight on the plot.
+    plot_width, # Width for correlation plot.
+    plot_height # Height for correlation plot.
+) {
+    # Create dot plot with GSEA results.
+    plot <- ggplot(
+        gse[gse$Description %in% terms,],
+        aes(x = NES, y = reorder(Description, NES), fill = -log10(p.adjust), size = Count) 
+    ) +
+        geom_point(shape = 21, color = "black") +
+        theme_bw() +
+        theme(
+            axis.text = element_text(size = 10),
+            axis.title = element_text(size = 12),
+            plot.title = element_text(size = 12, face = "bold", hjust = 0.5)
+        ) +
+        xlab("Normalized enrichment scores (NES)") +
+        ylab("Gene Ontology (GO) term") +
+        ggtitle(title) +
+        scale_colour_gradientn(
+            colors = colorRampPalette(rev(brewer.pal(9, "Reds")))(100),
+            name = expression(-log[10]~"(Adjusted p-value)")
+        ) +
+        scale_size_continuous(range = c(1,5), name = "# Genes")
+
+    # Save dot plot to output file.
+    pdf(
+        paste0(getwd(), "/results/", dataset, "/", str_to_title(dataset), "_", population_, "_GSEA_gseGO_ontALL_padj0.05_selectedTerms.pdf"),
+        width = plot_width,
+        height = plot_height
+    )
+    print(plot)
+    dev.off()
+}
+
+# do_ora()
+# @ This function uses findSignatures()'s output to perform ORA & save results to output csv files.
+do_ora <- function(
+    df, # Dataframe containing findSignatures results.
+    dataset, # Dataset name.
+    population_ # Cell population name, as output by findSignatures.
+) {
+    # Select only cell population specified.
+    df <- df[df$population == population_,]
+
+    # Filter out non-significant results.
+    df <- df[df$pvalue <= 0.05,]
+
+    # Get gene lists.
+    gene_list <- list(
+        "Upregulated" = df$gene[df$fc > 0],
+        "Downregulated" = df$gene[df$fc < 0],
+    )
+
+    # Perform Over-Representation Analysis (ORA) in the specified population.
+    comparison <- compareCluster(
+        gene_list,
+        fun = "enrichGO",
+        ont = "ALL",
+        keyType = "SYMBOL",
+        OrgDb = "org.Hs.eg.db",
+        pvalueCutoff = 0.05,
+        pAdjustMethod = "BH"
+    )
+    comparison <- as.data.frame(comparison)
+
+    # Save ORA results table to output file.
+    write.csv(
+        comparison, 
+        file = paste0(getwd(), "/results/", dataset, "/", str_to_title(dataset), "_", population_, "_ORA_compareCluster_enrichGO_ontALL_padj0.05.csv")
+    )
+
+    # Return ORA results.
+    return(comparison)
+}
+    
+# plot_ora()
+# @ This function uses enrichGO()'s output to plot ORA results, highlighting selected terms for the selected population.
+plot_ora <- function(
+    comparison, # Dataframe containing enrichGO results generated with compareCluster.
+    dataset, # Dataset name.
+    population_, # Cell population name used to perform ORA with enrichGO.
+    title, # Title for plot.
+    terms, # Terms to highlight on the plot.
+    plot_width, # Width for correlation plot.
+    plot_height # Height for correlation plot.
+) {
+    # Create dot plot with ORA results.
+    plot <- ggplot(
+          comparison[comparison$Description %in% terms,],
+          aes(x = -log10(p.adjust), y = reorder(Description, -log10(p.adjust)), fill = Cluster, size = Count) 
+    ) +
+        geom_point(shape = 21, color = "black") +
+        theme_bw() +
+        theme(
+            axis.text = element_text(size = 10),
+            axis.title = element_text(size = 12),
+            plot.title = element_text(size = 12, face = "bold", hjust = 0.5)
+        ) +
+        xlab(expression(-log[10]~"(Adjusted p-value)")) +
+        ylab("Gene Ontology (GO) term") +
+        ggtitle(title) +
+        scale_fill_manual(
+            values = c("indianred1", "royalblue1"),
+            labels = c("Upregulated", "Downregulated"),
+            name = "Cluster"
+        ) +
+        scale_size_continuous(range = c(1,5), name = "# Genes") +
+        geom_vline(xintercept = -log10(0.05), linetype = "dashed")
+
+    # Save dot plot to output file.
+    pdf(
+        paste0(getwd(), "/results/", dataset, "/", str_to_title(dataset), "_", population_, "_ORA_compareCluster_enrichGO_ontALL_padj0.05_selectedTerms.pdf"),
+        width = plot_width,
+        height = plot_height
+    )
+    print(plot)
+    dev.off()
+}
 
 
 # Darmanis et al. dataset -------------------------------------------------
 
+
 # Data downloaded from:
 # http://gbmseq.org
-# Cohort of 4 primary IDH1-negative glioblastomas.
 
 
 ## Step 1: Loading and subsetting data for analysis ------------------------
@@ -428,8 +619,7 @@ malignant_metadata_darmanis <- filter_out_samples(
 
 # Subset count data to keep only malignant cells & cells from samples that should be kept for
 # downstream analyses.
-malignant_data_darmanis <- data_darmanis %>% select(rownames(malignant_metadata_darmanis))
-
+malignant_data_darmanis <- data_darmanis %>% dplyr::select(rownames(malignant_metadata_darmanis))
 
 ## Step 2: Data processing -------------------------------------------------
 
@@ -455,10 +645,9 @@ cellrouter_darmanis <- process_cellrouter(
 plot_prnp_across_samples(
     cellrouter = cellrouter_darmanis,
     dataset = "darmanis",
-    plot_width = 5,
-    plot_height = 5
+    plot_width = 2.5,
+    plot_height = 3
 )
-
 
 ## Step 3: Establishing groups with distinct PRNP levels -------------------
 
@@ -473,8 +662,8 @@ dim.red.darmanis <- concatenate_data(cellrouter = cellrouter_darmanis)
 plot_prnp_umap(
     dim.red = dim.red.darmanis,
     dataset = "darmanis",
-    plot_width = 5,
-    plot_height = 5
+    plot_width = 4.5,
+    plot_height = 4
 )
 
 #### @ FIGURE S2A, LEFT PANEL (SUPPLEMENTAL) @ #### 
@@ -482,8 +671,8 @@ plot_prnp_umap(
 plot_sample_umap(
     dim.red = dim.red.darmanis,
     dataset = "darmanis",
-    plot_width = 5,
-    plot_height = 5
+    plot_width = 4.5,
+    plot_height = 4
 )
 
 ## Step 4: Finding signatures of PRNP+ and PRNP- cells ---------------------
@@ -496,6 +685,69 @@ markers_darmanis <- get_signatures(
 # Currently not used in the manuscript.
 # plot_signature_volcano(markers_darmanis, "darmanis")
 
+# Perform GSEA on markers found for PRNP positive cells.
+gsea_darmanis_prnp_pos <- do_gsea(
+    df = markers_darmanis,
+    dataset = "darmanis",
+    population_ = "PRNP_positive_cells"
+)
+plot_gsea(
+    gse = gsea_darmanis_prnp_pos,
+    dataset = "darmanis",
+    population_ = "PRNP_positive_cells",
+    title = expression("Markers of"~italic("PRNP")~"positive cells"),
+    terms = ,
+    plot_width = 10,
+    plot_height = 8
+)
+
+# Perform GSEA on markers found for PRNP negative cells.
+gsea_darmanis_prnp_neg <- do_gsea(
+    df = markers_darmanis,
+    dataset = "darmanis",
+    population_ = "PRNP_negative_cells"
+)
+plot_gsea(
+    gse = gsea_darmanis_prnp_neg,
+    dataset = "darmanis",
+    population_ = "PRNP_negative_cells",
+    title = expression("Markers of"~italic("PRNP")~"negative cells"),
+    terms = ,
+    plot_width = 10,
+    plot_height = 8
+)
+
+# Perform ORA on markers found for PRNP positive cells.
+ora_darmanis_prnp_pos <- do_ora(
+    df = markers_darmanis,
+    dataset = "darmanis",
+    population_ = "PRNP_positive_cells"
+)
+plot_ora(
+    gse = ora_darmanis_prnp_pos,
+    dataset = "darmanis",
+    population_ = "PRNP_positive_cells",
+    title = expression("Markers of"~italic("PRNP")~"positive cells"),
+    terms = ,
+    plot_width = 10,
+    plot_height = 8
+)
+
+# Perform ORA on markers found for PRNP negative cells.
+ora_darmanis_prnp_neg <- do_ora(
+    df = markers_darmanis,
+    dataset = "darmanis",
+    population_ = "PRNP_negative_cells"
+)
+plot_ora(
+    gse = ora_darmanis_prnp_neg,
+    dataset = "darmanis",
+    population_ = "PRNP_negative_cells",
+    title = expression("Markers of"~italic("PRNP")~"negative cells"),
+    terms = ,
+    plot_width = 10,
+    plot_height = 8
+)
 
 ## Step 5: Correlation analysis --------------------------------------------
 
@@ -508,11 +760,9 @@ df_darmanis <- get_correlations_with_prnp(
 plot_correlations_with_prnp(
     df = df_darmanis, 
     dataset = "darmanis",
-    plot_width = 8,
-    plot_height = 6
+    plot_width = 5,
+    plot_height = 3
 )
-
-
 
 
 # Neftel et al. dataset ---------------------------------------------------
@@ -526,7 +776,11 @@ plot_correlations_with_prnp(
 
 # Load Neftel et al count data.
 data_neftel <- read.table(
+<<<<<<< HEAD
     "data/neftel/IDHwtGBM.processed.SS2.logTPM.txt.gz",
+=======
+    paste0(getwd(), "/data/neftel/IDHwtGBM.processed.SS2.logTPM.txt"),
+>>>>>>> cb9dbb0da29d78456ae9f1d501ea5b6b329f12a5
     header = TRUE,
     row.names = 1,
     sep = "\t",
@@ -535,7 +789,7 @@ data_neftel <- read.table(
 
 # Load Neftel et al metadata.
 metadata_neftel <- read.table(
-    "data/neftel/IDHwt.GBM.Metadata.SS2.txt",
+    paste0(getwd(), "/data/neftel/IDHwt.GBM.Metadata.SS2.txt"),
     header = TRUE,
     row.names = 1,
     sep = "\t",
@@ -553,17 +807,13 @@ malignant_metadata_neftel <- filter_out_samples(
 
 # Subset count data to keep only malignant cells & cells from samples that should be kept for
 # downstream analyses.
-malignant_data_neftel <- data_neftel %>% select(rownames(malignant_metadata_neftel))
-
-# Convert count data dataframe to sparse matrix.
-malignant_data_sparse_neftel <- as(as.matrix(malignant_data_neftel), "sparseMatrix")
-
+malignant_data_neftel <- data_neftel %>% dplyr::select(rownames(malignant_metadata_neftel))
 
 ## Step 2: Data processing -------------------------------------------------
 
 # Create CellRouter object for Neftel et al dataset.
 cellrouter_neftel <- CreateCellRouter(
-    malignant_data_sparse_neftel,
+    as.matrix(malignant_data_neftel),
     min.cells = 0,
     min.genes = 0,
     is.expr = 0
@@ -583,8 +833,8 @@ cellrouter_neftel <- process_cellrouter(
 plot_prnp_across_samples(
     cellrouter = cellrouter_neftel,
     dataset = "neftel",
-    plot_width = 15,
-    plot_height = 5
+    plot_width = 9,
+    plot_height = 3
 )
 
 ## Step 3: Establishing groups with distinct PRNP levels -------------------
@@ -600,8 +850,8 @@ dim.red.neftel <- concatenate_data(cellrouter = cellrouter_neftel)
 plot_prnp_umap(
     dim.red = dim.red.neftel,
     dataset = "neftel",
-    plot_width = 5,
-    plot_height = 5
+    plot_width = 4.5,
+    plot_height = 4
 )
 
 #### @ FIGURE S2A, CENTRAL PANEL (SUPPLEMENTAL) @ #### 
@@ -609,10 +859,9 @@ plot_prnp_umap(
 plot_sample_umap(
     dim.red = dim.red.neftel,
     dataset = "neftel",
-    plot_width = 5,
-    plot_height = 5
+    plot_width = 4.5,
+    plot_height = 4
 )
-
 
 ## Step 4: Finding signatures of PRNP+ and PRNP- cells ---------------------
 
@@ -623,6 +872,70 @@ markers_neftel <- get_signatures(
 
 # Currently not used in the manuscript.
 # plot_signature_volcano(markers_neftel, "neftel")
+
+# Perform GSEA on markers found for PRNP positive cells.
+gsea_neftel_prnp_pos <- do_gsea(
+    df = markers_neftel,
+    dataset = "neftel",
+    population_ = "PRNP_positive_cells"
+)
+plot_gsea(
+    gse = gsea_neftel_prnp_pos,
+    dataset = "neftel",
+    population_ = "PRNP_positive_cells",
+    title = expression("Markers of"~italic("PRNP")~"positive cells"),
+    terms = ,
+    plot_width = 10,
+    plot_height = 8
+)
+
+# Perform GSEA on markers found for PRNP negative cells.
+gsea_neftel_prnp_neg <- do_gsea(
+    df = markers_neftel,
+    dataset = "neftel",
+    population_ = "PRNP_negative_cells"
+)
+plot_gsea(
+    gse = gsea_neftel_prnp_neg,
+    dataset = "neftel",
+    population_ = "PRNP_negative_cells",
+    title = expression("Markers of"~italic("PRNP")~"negative cells"),
+    terms = ,
+    plot_width = 10,
+    plot_height = 8
+)
+
+# Perform ORA on markers found for PRNP positive cells.
+ora_neftel_prnp_pos <- do_ora(
+    df = markers_neftel,
+    dataset = "neftel",
+    population_ = "PRNP_positive_cells"
+)
+plot_ora(
+    gse = ora_neftel_prnp_pos,
+    dataset = "neftel",
+    population_ = "PRNP_positive_cells",
+    title = expression("Markers of"~italic("PRNP")~"positive cells"),
+    terms = ,
+    plot_width = 10,
+    plot_height = 8
+)
+
+# Perform ORA on markers found for PRNP negative cells.
+ora_neftel_prnp_neg <- do_ora(
+    df = markers_neftel,
+    dataset = "neftel",
+    population_ = "PRNP_negative_cells"
+)
+plot_ora(
+    gse = ora_neftel_prnp_neg,
+    dataset = "neftel",
+    population_ = "PRNP_negative_cells",
+    title = expression("Markers of"~italic("PRNP")~"negative cells"),
+    terms = ,
+    plot_width = 10,
+    plot_height = 8
+)
 
 ## Step 5: Correlation analysis --------------------------------------------
 
@@ -635,21 +948,26 @@ df_neftel <- get_correlations_with_prnp(
 plot_correlations_with_prnp(
     df = df_neftel, 
     dataset = "neftel",
-    plot_width = 8,
-    plot_height = 6
+    plot_width = 5,
+    plot_height = 3
 )
-
 
 
 # Richards et al. dataset -------------------------------------------------
 
+
 # Data downloaded from:
 # https://singlecell.broadinstitute.org/single_cell/study/SCP503/gradient-of-developmental-and-injury-reponse-transcriptional-states-define-functional-vulnerabilities-underpinning-glioblastoma-heterogeneity
+
 
 ## Step 1: Loading and subsetting data for analysis ------------------------
 
 GBM_44k_raw_data <- read.csv(
+<<<<<<< HEAD
     "data/richards/Richards_NatureCancer_GBM_scRNAseq_counts.csv.gz",
+=======
+    paste0(getwd(), "/data/richards/Richards_NatureCancer_GBM_scRNAseq_counts.csv"),
+>>>>>>> cb9dbb0da29d78456ae9f1d501ea5b6b329f12a5
     header = TRUE,
     row.names = 1,
     sep = ",",
@@ -657,7 +975,7 @@ GBM_44k_raw_data <- read.csv(
 )
 
 GSC_and_whole_tumor_metadata <- read.table(
-    "data/richards/GSCs_Tumour_MetaData.txt",
+    paste0(getwd(), "/data/richards/GSCs_Tumour_MetaData.txt"),
     header = TRUE,
     row.names = 1,
     sep = "\t",
@@ -670,10 +988,25 @@ rownames(GSC_and_whole_tumor_metadata) <- gsub('GBM_', '', rownames(GSC_and_whol
 # Subset metadata to keep only malignant cells.
 malignant_metadata_richards <- GSC_and_whole_tumor_metadata[GSC_and_whole_tumor_metadata$Sample.Type == "TUMOUR",]
 
+# Create new sample column that matches the study's clinical metadata sample IDs.
+malignant_metadata_richards$Sample_clean <- sapply(1:nrow(malignant_metadata_richards), function(x) {
+    if(!grepl("-", malignant_metadata_richards$Sample.ID[x])) {
+        return(malignant_metadata_richards$Sample.ID[x])
+    } else {
+        sample_clean <- gsub("[-]([A-Z]).*", "", malignant_metadata_richards$Sample.ID[x])
+        sample_clean <- paste0(sample_clean, "_T")
+        return(sample_clean)
+    }    
+})
+
 # Filter out samples that should not be used for downstream analyses.
 malignant_metadata_richards <- filter_out_samples(
     mdata = malignant_metadata_richards, 
+<<<<<<< HEAD
     sample_column = "Sample.ID"
+=======
+    sample_column = "Sample_clean"
+>>>>>>> cb9dbb0da29d78456ae9f1d501ea5b6b329f12a5
 )
 
 # Subset count data to keep only malignant cells & cells from samples that should be kept for
@@ -681,14 +1014,11 @@ malignant_metadata_richards <- filter_out_samples(
 malignant_data_richards <- GBM_44k_raw_data[,colnames(GBM_44k_raw_data) %in% rownames(GSC_and_whole_tumor_metadata)[GSC_and_whole_tumor_metadata$Sample.Type == "TUMOUR"]]
 malignant_data_richards <- malignant_data_richards %>% select(rownames(malignant_metadata_richards))
 
-# Convert count data dataframe to sparse matrix.
-malignant_data_sparse_richards <- as(as.matrix(malignant_data_richards), "sparseMatrix")
-
 ## Step 2: Data processing -------------------------------------------------
 
 # Create CellRouter object for Richards et al dataset.
 cellrouter_richards <- CreateCellRouter(
-    malignant_data_sparse_richards, 
+    as.matrix(malignant_data_richards), 
     min.genes = 0,
     min.cells = 0,
     is.expr = 0
@@ -699,7 +1029,7 @@ cellrouter_richards <- process_cellrouter(
     cellrouter = cellrouter_richards,
     metadata = malignant_metadata_richards,
     normalized = FALSE,
-    sample_column_id = "Sample",
+    sample_column_id = "Sample_clean",
     dataset = "richards"
 )
 
@@ -745,6 +1075,70 @@ markers_richards <- get_signatures(cellrouter_richards, "richards")
 # Currently not used in the manuscript.
 # plot_signature_volcano(markers_richards, "richards")
 
+# Perform GSEA on markers found for PRNP positive cells.
+gsea_richards_prnp_pos <- do_gsea(
+    df = markers_richards,
+    dataset = "richards",
+    population_ = "PRNP_positive_cells"
+)
+plot_gsea(
+    gse = gsea_richards_prnp_pos,
+    dataset = "richards",
+    population_ = "PRNP_positive_cells",
+    title = expression("Markers of"~italic("PRNP")~"positive cells"),
+    terms = ,
+    plot_width = 10,
+    plot_height = 8
+)
+
+# Perform GSEA on markers found for PRNP negative cells.
+gsea_richards_prnp_neg <- do_gsea(
+    df = markers_richards,
+    dataset = "richards",
+    population_ = "PRNP_negative_cells"
+)
+plot_gsea(
+    gse = gsea_richards_prnp_neg,
+    dataset = "richards",
+    population_ = "PRNP_negative_cells",
+    title = expression("Markers of"~italic("PRNP")~"negative cells"),
+    terms = ,
+    plot_width = 10,
+    plot_height = 8
+)
+
+# Perform ORA on markers found for PRNP positive cells.
+ora_richards_prnp_pos <- do_ora(
+    df = markers_richards,
+    dataset = "richards",
+    population_ = "PRNP_positive_cells"
+)
+plot_ora(
+    gse = ora_richards_prnp_pos,
+    dataset = "richards",
+    population_ = "PRNP_positive_cells",
+    title = expression("Markers of"~italic("PRNP")~"positive cells"),
+    terms = ,
+    plot_width = 10,
+    plot_height = 8
+)
+
+# Perform ORA on markers found for PRNP negative cells.
+ora_richards_prnp_neg <- do_ora(
+    df = markers_richards,
+    dataset = "richards",
+    population_ = "PRNP_negative_cells"
+)
+plot_ora(
+    gse = ora_richards_prnp_neg,
+    dataset = "richards",
+    population_ = "PRNP_negative_cells",
+    title = expression("Markers of"~italic("PRNP")~"negative cells"),
+    terms = ,
+    plot_width = 10,
+    plot_height = 8
+)
+
 ## Step 5: Correlation analysis --------------------------------------------
 
 df_richards <- get_correlations_with_prnp(cellrouter_richards, "richards")
@@ -753,9 +1147,89 @@ df_richards <- get_correlations_with_prnp(cellrouter_richards, "richards")
 plot_correlations_with_prnp(
     df = df_richards,
     dataset = "richards",
-    plot_width = 8,
-    plot_height = 6
+    plot_width = 5,
+    plot_height = 3
 )
  
+
+# Comparing the datasets ---------------------------------------------------
+
+## Step 1: Finding common upregulated marker genes -------------------------
+
+# Create list with upregulated markers of PRNP positive cells of each dataset
+markers_prnp_positive_upGenes <- list(
+    "darmanis" = markers_darmanis$gene[markers_darmanis$population == "PRNP_positive_cells" & markers_darmanis$fc > 0],
+    "neftel" = markers_neftel$gene[markers_neftel$population == "PRNP_positive_cells" & markers_neftel$fc > 0],
+    "richards" = markers_richards$gene[markers_richards$population == "PRNP_positive_cells" & markers_richards$fc > 0]
+)
+
+# Create Venn diagram.
+venn.diagram(
+    x = markers_prnp_positive_upGenes,
+    category.names = c("Darmanis" , "Neftel" , "Richards"),
+    filename = 'common_markers_prnp_positive_upGenes.png',
+    output = TRUE,
+    imagetype = "png" ,
+    height = 480 , 
+    width = 480 , 
+    resolution = 300,
+    compression = "lzw",
+    lwd = 2,
+    lty = 'blank',
+    fill = brewer.pal(3, "Pastel1")
+    cex = 0.6,
+    fontface = "bold",
+    fontfamily = "sans",
+    cat.cex = 0.6,
+    cat.fontface = "bold",
+    cat.default.pos = "outer",
+    cat.pos = c(-27, 27, 135),
+    cat.dist = c(0.055, 0.055, 0.085),
+    cat.fontfamily = "sans",
+    rotation = 1
+)
+
+# Find the intersection of all datasets.
+common_prnp_positive_upGenes <- Reduce(intersect, markers_prnp_positive_upGenes)
+
+## Step 2: Finding common positively correlated genes ----------------------
+
+# Create list with genes positively correlated with PRNP of each dataset
+genes_positiveCorr_with_prnp <- list(
+    "darmanis" = df_darmanis$gene2[df_darmanis$status == "Positive correlation"],
+    "neftel" = df_neftel$gene2[df_neftel$status == "Positive correlation"],
+    "richards" = df_richards$gene2[df_richards$status == "Positive correlation"],
+)
+
+# Create Venn diagram.
+venn.diagram(
+    x = genes_positiveCorr_with_prnp,
+    category.names = c("Darmanis" , "Neftel" , "Richards"),
+    filename = 'common_genes_positiveCorr_with_PRNP.png',
+    output = TRUE,
+    imagetype = "png" ,
+    height = 480 , 
+    width = 480 , 
+    resolution = 300,
+    compression = "lzw",
+    lwd = 2,
+    lty = 'blank',
+    fill = brewer.pal(3, "Pastel1")
+    cex = 0.6,
+    fontface = "bold",
+    fontfamily = "sans",
+    cat.cex = 0.6,
+    cat.fontface = "bold",
+    cat.default.pos = "outer",
+    cat.pos = c(-27, 27, 135),
+    cat.dist = c(0.055, 0.055, 0.085),
+    cat.fontfamily = "sans",
+    rotation = 1
+)
+
+# Find the intersection of all datasets.
+common_genes_positiveCorr_with_prnp <- Reduce(intersect, genes_positiveCorr_with_prnp)
+
+
 # The End
 sessionInfo()
