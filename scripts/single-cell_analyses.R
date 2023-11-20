@@ -421,7 +421,7 @@ do_gsea <- function(
     df <- df[df$population == population_,]
 
     # Filter out non-significant results.
-    df <- df[df$pvalue <= 0.05,]
+    df <- df[df$pval <= 0.05,]
 
     # Get ranked gene list.
     gene_list <- df$fc
@@ -468,7 +468,7 @@ plot_gsea <- function(
     # Create dot plot with GSEA results.
     plot <- ggplot(
         gse[gse$Description %in% terms,],
-        aes(x = NES, y = reorder(Description, NES), fill = -log10(p.adjust), size = Count) 
+        aes(x = NES, y = reorder(Description, NES), fill = -log10(p.adjust), size = setSize) 
     ) +
         geom_point(shape = 21, color = "black") +
         theme_bw() +
@@ -507,7 +507,7 @@ do_ora <- function(
     df <- df[df$population == population_,]
 
     # Filter out non-significant results.
-    df <- df[df$pvalue <= 0.05,]
+    df <- df[df$pval <= 0.05,]
 
     # Get gene lists.
     gene_list <- list(
@@ -776,11 +776,7 @@ plot_correlations_with_prnp(
 
 # Load Neftel et al count data.
 data_neftel <- read.table(
-<<<<<<< HEAD
-    "data/neftel/IDHwtGBM.processed.SS2.logTPM.txt.gz",
-=======
-    paste0(getwd(), "/data/neftel/IDHwtGBM.processed.SS2.logTPM.txt"),
->>>>>>> cb9dbb0da29d78456ae9f1d501ea5b6b329f12a5
+    paste0(getwd(), "/data/neftel/IDHwtGBM.processed.SS2.logTPM.txt.gz"),
     header = TRUE,
     row.names = 1,
     sep = "\t",
@@ -1030,8 +1026,8 @@ cellrouter_richards <- process_cellrouter(
 plot_prnp_across_samples(
     cellrouter = cellrouter_richards,
     dataset = "richards",
-    plot_width = 15,
-    plot_height = 5
+    plot_width = 2.5,
+    plot_height = 3
 )
 
 ## Step 3: Establishing groups with distinct PRNP levels -------------------
@@ -1047,8 +1043,8 @@ dim.red.richards <- concatenate_data(cellrouter = cellrouter_richards)
 plot_prnp_umap(
     dim.red = dim.red.richards,
     dataset = "richards",
-    plot_width = 5,
-    plot_height = 5
+    plot_width = 4.5,
+    plot_height = 4
 )
 
 #### @ FIGURE S2A, RIGHT PANEL (SUPPLEMENTAL) @ #### 
@@ -1056,8 +1052,8 @@ plot_prnp_umap(
 plot_sample_umap(
     dim.red = dim.red.richards,
     dataset = "richards",
-    plot_width = 5,
-    plot_height = 5
+    plot_width = 4.5,
+    plot_height = 4
 )
 
 ## Step 4: Finding signatures of PRNP+ and PRNP- cells ---------------------
@@ -1221,7 +1217,6 @@ venn.diagram(
 
 # Find the intersection of all datasets.
 common_genes_positiveCorr_with_prnp <- Reduce(intersect, genes_positiveCorr_with_prnp)
-
 
 # The End
 sessionInfo()
