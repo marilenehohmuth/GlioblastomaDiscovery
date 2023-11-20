@@ -963,11 +963,7 @@ plot_correlations_with_prnp(
 ## Step 1: Loading and subsetting data for analysis ------------------------
 
 GBM_44k_raw_data <- read.csv(
-<<<<<<< HEAD
-    "data/richards/Richards_NatureCancer_GBM_scRNAseq_counts.csv.gz",
-=======
-    paste0(getwd(), "/data/richards/Richards_NatureCancer_GBM_scRNAseq_counts.csv"),
->>>>>>> cb9dbb0da29d78456ae9f1d501ea5b6b329f12a5
+    paste0(getwd(), "/data/richards/Richards_NatureCancer_GBM_scRNAseq_counts.csv.gz"),
     header = TRUE,
     row.names = 1,
     sep = ",",
@@ -1002,17 +998,13 @@ malignant_metadata_richards$Sample_clean <- sapply(1:nrow(malignant_metadata_ric
 # Filter out samples that should not be used for downstream analyses.
 malignant_metadata_richards <- filter_out_samples(
     mdata = malignant_metadata_richards, 
-<<<<<<< HEAD
-    sample_column = "Sample.ID"
-=======
     sample_column = "Sample_clean"
->>>>>>> cb9dbb0da29d78456ae9f1d501ea5b6b329f12a5
 )
 
 # Subset count data to keep only malignant cells & cells from samples that should be kept for
 # downstream analyses.
 malignant_data_richards <- GBM_44k_raw_data[,colnames(GBM_44k_raw_data) %in% rownames(GSC_and_whole_tumor_metadata)[GSC_and_whole_tumor_metadata$Sample.Type == "TUMOUR"]]
-malignant_data_richards <- malignant_data_richards %>% select(rownames(malignant_metadata_richards))
+malignant_data_richards <- malignant_data_richards %>% dplyr::select(rownames(malignant_metadata_richards))
 
 ## Step 2: Data processing -------------------------------------------------
 
