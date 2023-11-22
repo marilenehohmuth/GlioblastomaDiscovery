@@ -2,6 +2,7 @@ library(Hmisc)
 library(ggplot2)
 library(RColorBrewer)
 library(ggpubr)
+library(biomaRt)                  # 2.46.3 
 
 common.genes <- c('DSTN',
                   'PIGT',
@@ -46,7 +47,30 @@ common.genes <- c('DSTN',
                   'REEP5',
                   'SERPINB6')
 
+## load metadata
 tissue.log.metadata <- readRDS("results/TCGA-GBM/Tissue_logData+Metadata.RDS")
+## get ids and remove . after it
+gene_ids <- names(tissue.log.metadata)[109:length(names(tissue.log.metadata))]
+gene_ids <- sub("\\..*", "", gene_ids)
+names(tissue.log.metadata)[109:length(names(tissue.log.metadata))] <- gene_ids
+
+## change gene ids to symbols
+## determine biomaRt settings.
+ensembl <- useMart("ensembl")
+ensembl = useDataset("hsapiens_gene_ensembl",  mart = ensembl)
+
+## get correspondence between ENSEMBL IDs and gene symbols.
+genemap <- getBM(
+  filters = c("ensembl_gene_id"),
+  attributes = c("ensembl_gene_id", "hgnc_symbol"),
+  values = gene_ids, 
+  mart = ensembl
+)
+
+## rename columns
+for (i in seq_len(nrow(genemap))) {
+  names(tissue.log.metadata)[names(tissue.log.metadata) == genemap$ensembl_gene_id[i]] <- genemap$hgnc_symbol[i]
+}
 
 df_tissues <- data.frame(matrix(ncol = 3))
 for (gene in common.genes) {
@@ -63,7 +87,7 @@ for (gene in common.genes) {
 df_tissues <- df_tissues[complete.cases(df_tissues),]
 colnames(df_tissues) <- c("gene", "expression", "tissue")
 
-pdf("results/TCGA/42_genes_across_tissues.pdf",
+pdf("results/TCGA-GBM/42_genes_across_tissues.pdf",
     width = 14,
     height = 16)
 ggplot(df_tissues,
@@ -90,7 +114,31 @@ ggplot(df_tissues,
 dev.off()
 
 
-pGBM.log.metadata <- readRDS("results/TCGA/PrimaryGBMs_logData+Metadata.RDS")
+pGBM.log.metadata <- readRDS("results/TCGA-GBM/PrimaryGBMs_logData+Metadata.RDS")
+
+## get ids and remove . after it
+gene_ids <- names(pGBM.log.metadata)[110:length(names(pGBM.log.metadata))]
+gene_ids <- sub("\\..*", "", gene_ids)
+names(pGBM.log.metadata)[110:length(names(pGBM.log.metadata))] <- gene_ids
+
+## change gene ids to symbols
+## determine biomaRt settings.
+ensembl <- useMart("ensembl")
+ensembl = useDataset("hsapiens_gene_ensembl",  mart = ensembl)
+
+## get correspondence between ENSEMBL IDs and gene symbols.
+genemap <- getBM(
+  filters = c("ensembl_gene_id"),
+  attributes = c("ensembl_gene_id", "hgnc_symbol"),
+  values = gene_ids, 
+  mart = ensembl
+)
+
+## rename columns
+for (i in seq_len(nrow(genemap))) {
+  names(pGBM.log.metadata)[names(pGBM.log.metadata) == genemap$ensembl_gene_id[i]] <- genemap$hgnc_symbol[i]
+}
+
 
 df_idh <- data.frame(matrix(ncol = 3))
 for (gene in common.genes) {
@@ -110,7 +158,7 @@ colnames(df_idh) <- c("gene", "expression", "idh")
 df_idh$idh <- factor(df_idh$idh, c("IDH-mutant", "IDH-WT", "Unclassified"))
 
 
-pdf("results/TCGA/42_genes_across_idh.pdf",
+pdf("results/TCGA-GBM/42_genes_across_idh.pdf",
     width = 14,
     height = 16)
 ggplot(df_idh,
@@ -162,7 +210,7 @@ df_subtype <- df_subtype[complete.cases(df_subtype),]
 colnames(df_subtype) <- c("gene", "expression", "subtype")
 df_subtype$subtype <- factor(df_subtype$subtype, c("Proneural", "Classical", "Mesenchymal", "Neural", "Unclassified"))
 
-pdf("results/TCGA/42_genes_across_subtype.pdf",
+pdf("results/TCGA-GBM/42_genes_across_subtype.pdf",
     width = 14,
     height = 16)
 ggplot(df_subtype,
