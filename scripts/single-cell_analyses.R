@@ -6,7 +6,7 @@
 
 ## Loading packages --------------------------------------------------------
 
-library(fusca)                    # 1.2.1
+library(fusca)                    # 1.3.1
 library(ggplot2)                  # 3.3.5
 library(dplyr)                    # 1.0.7
 library(Matrix)                   # 1.3-4
@@ -696,7 +696,7 @@ plot_gsea(
     dataset = "darmanis",
     population_ = "PRNP_positive_cells",
     title = expression("Markers of"~italic("PRNP")~"positive cells"),
-    terms = ,
+    terms = gsea_darmanis_prnp_pos$Description[grepl("vesicle|transport", gsea_darmanis_prnp_pos$Description)],
     plot_width = 10,
     plot_height = 8
 )
@@ -1155,7 +1155,7 @@ markers_prnp_positive_upGenes <- list(
 venn.diagram(
     x = markers_prnp_positive_upGenes,
     category.names = c("Darmanis" , "Neftel" , "Richards"),
-    filename = 'common_markers_prnp_positive_upGenes.png',
+    filename = paste0(getwd(), '/results/comparison_single_cell/single_cell_datasets_common_markers_prnp_positive_upGenes.png'),
     output = TRUE,
     imagetype = "png" ,
     height = 480 , 
@@ -1164,7 +1164,7 @@ venn.diagram(
     compression = "lzw",
     lwd = 2,
     lty = 'blank',
-    fill = brewer.pal(3, "Pastel1")
+    fill = brewer.pal(3, "Pastel1"),
     cex = 0.6,
     fontface = "bold",
     fontfamily = "sans",
@@ -1179,6 +1179,53 @@ venn.diagram(
 
 # Find the intersection of all datasets.
 common_prnp_positive_upGenes <- Reduce(intersect, markers_prnp_positive_upGenes)
+
+# Save common genes to output file.
+write.csv(
+    common_prnp_positive_upGenes, 
+    file = paste0(getwd(), "/results/comparison_single_cell/single_cell_datasets_common_PRNPpositive_upGenes.csv")
+)
+
+# Perform Over-Representation Analysis (ORA).
+comparison <- enrichGO(
+    common_prnp_positive_upGenes,
+    ont = "ALL",
+    keyType = "SYMBOL",
+    OrgDb = "org.Hs.eg.db",
+    pvalueCutoff = 0.05,
+    pAdjustMethod = "BH"
+)
+comparison <- as.data.frame(comparison)
+
+# Save ORA results to output file.
+write.csv(
+    comparison, 
+    file = paste0(getwd(), "/results/comparison_single_cell/single_cell_datasets_ORA_enrichGO_ontALL_padj0.05.csv")
+)
+
+# Plot ORA results.
+pdf(
+    paste0(getwd(), "/results/comparison_single_cell/single_cell_datasets_ORA_enrichGO_ontALL_padj0.05_selectedTerms.pdf"),
+    width = 8,
+    height = 8
+)
+ggplot(
+    comparison[grepl("vesicle|transport", comparison$Description),],
+    aes(x = -log10(p.adjust), y = reorder(Description, -log10(p.adjust)), size = Count) 
+) +
+    geom_point(shape = 21, color = "black", fill = "palegreen2") +
+    theme_bw() +
+    theme(
+        axis.text = element_text(size = 10),
+        axis.title = element_text(size = 12),
+        plot.title = element_text(size = 12, face = "bold", hjust = 0.5)
+    ) +
+    xlab(expression(-log[10]~"(Adjusted p-value)")) +
+    ylab("Gene Ontology (GO) term") +
+    ggtitle("") +
+    scale_size_continuous(range = c(1,5), name = "# Genes") +
+    geom_vline(xintercept = -log10(0.05), linetype = "dashed")
+dev.off()
 
 ## Step 2: Finding common positively correlated genes ----------------------
 
