@@ -15,6 +15,7 @@ library(RColorBrewer)             # 1.1_3
 library(ggpubr)                   # 0.6.0
 library(VennDiagram)              # 1.7.3
 library(dplyr)                    # 1.1.3
+library(clusterProfiler)          # 4.8.1
 library(org.Hs.eg.db)             # 3.17.0
 
 ################################################
@@ -138,7 +139,7 @@ df_tissues$symbol <- correspondence$SYMBOL[match(df_tissues$gene, correspondence
 
 # Generate plot & save it to output file.
 pdf(
-    paste0(getwd(), "/results/comparison_all/all_datasets_common_genes_across_tissues.pdf"),
+    paste0(getwd(), "/results/comparison_all/all_datasets_common_PRNPhigh_or_positive_upGenes_across_tissues.pdf"),
     width = 14,
     height = 20
 )
@@ -194,7 +195,7 @@ df_idh$symbol <- correspondence$SYMBOL[match(df_idh$gene, correspondence$ENSEMBL
 
 # Generate plot & save it to output file.
 pdf(
-    paste0(getwd(), "/results/comparison_all/all_datasets_common_genes_across_idh.pdf"),
+    paste0(getwd(), "/results/comparison_all/all_datasets_common_PRNPhigh_or_positive_upGenes_across_idh.pdf"),
     width = 14,
     height = 20
 )
@@ -248,7 +249,7 @@ df_subtype$symbol <- correspondence$SYMBOL[match(df_subtype$gene, correspondence
 
 # Generate plot & save it to output file.
 pdf(
-    paste0(getwd(), "/results/comparison_all/all_datasets_common_genes_across_subtypes.pdf"),
+    paste0(getwd(), "/results/comparison_all/all_datasets_common_PRNPhigh_or_positive_upGenes_across_subtypes.pdf"),
     width = 14,
     height = 20
 )
@@ -275,4 +276,45 @@ ggplot(
         method = 'kruskal.test'
     )+
     scale_fill_manual(values = c("#C77CFF", "#F8766D", "#7CAE00", "gray"))
+dev.off()
+
+# Perform Over-Representation Analysis (ORA).
+comparison <- enrichGO(
+    correspondence$SYMBOL,
+    ont = "ALL",
+    keyType = "SYMBOL",
+    OrgDb = "org.Hs.eg.db",
+    pvalueCutoff = 0.05,
+    pAdjustMethod = "BH"
+)
+comparison <- as.data.frame(comparison)
+
+# Save ORA results to output file.
+write.csv(
+    comparison, 
+    file = paste0(getwd(), "/results/comparison_all/all_datasets_common_PRNPhigh_or_positive_upGenes_ORA_enrichGO_ontALL_padj0.05.csv")
+)
+
+# Plot ORA results.
+pdf(
+    paste0(getwd(), "/results/comparison_all/all_datasets_ORA_common_PRNPpositive_upGenes_enrichGO_ontALL_padj0.05_selectedTerms.pdf"),
+    width = 8,
+    height = 8
+)
+ggplot(
+    comparison[grepl("vesicle|transport", comparison$Description),],
+    aes(x = -log10(p.adjust), y = reorder(Description, -log10(p.adjust)), size = Count) 
+) +
+    geom_point(shape = 21, color = "black", fill = "palegreen2") +
+    theme_bw() +
+    theme(
+        axis.text = element_text(size = 10),
+        axis.title = element_text(size = 12),
+        plot.title = element_text(size = 12, face = "bold", hjust = 0.5)
+    ) +
+    xlab(expression(-log[10]~"(Adjusted p-value)")) +
+    ylab("Gene Ontology (GO) term") +
+    ggtitle("") +
+    scale_size_continuous(range = c(1,5), name = "# Genes") +
+    geom_vline(xintercept = -log10(0.05), linetype = "dashed")
 dev.off()
