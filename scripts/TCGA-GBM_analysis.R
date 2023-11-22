@@ -487,7 +487,8 @@ volcano <- ggplot(
   geom_text_repel(
     data = deg.all[deg.all$gene_symbol == "PRNP",],
     aes(label = gene_symbol),
-    color = "black"
+    color = "black",
+    seed = 42
   )
 
 pdf(paste0(getwd(), "/results/TCGA-GBM/TCGA-GBM_PRNP-High_vs_PRNP-Low_volcano_withPRNP.pdf"), width = 8, height = 4)
