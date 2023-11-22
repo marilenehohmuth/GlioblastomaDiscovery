@@ -22,6 +22,7 @@ library(Hmisc)                    # 5.1_1
 library(RColorBrewer)             # 1.1_3
 library(clusterProfiler)          # 4.8.1
 library(org.Hs.eg.db)             # 3.17.0
+library(ggrepel)                  # 0.9.4
 
 ################################
 #### Step 1: Data retrieval ####
@@ -482,7 +483,12 @@ volcano <- ggplot(
   guides(color = guide_legend(override.aes = list(size=5))) +
   geom_vline(xintercept = 0, linetype = "dashed") +
   geom_hline(yintercept = -log10(0.05), linetype = "dashed") +
-  ggtitle(expression(italic("PRNP")^"high"~italic("versus")~italic("PRNP")^"low"))
+  ggtitle(expression(italic("PRNP")^"high"~italic("versus")~italic("PRNP")^"low")) +
+  geom_text_repel(
+    data = deg.all[deg.all$gene_symbol == "PRNP",],
+    aes(label = gene_symbol),
+    color = "black"
+  )
 
 pdf(paste0(getwd(), "/results/TCGA-GBM/TCGA-GBM_PRNP-High_vs_PRNP-Low_volcano_withPRNP.pdf"), width = 8, height = 4)
 volcano
