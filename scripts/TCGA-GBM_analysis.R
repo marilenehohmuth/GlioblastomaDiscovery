@@ -531,6 +531,7 @@ write.csv(
 terms <- c(
   "immunoglobulin complex",
   "immune response",
+  "antigen receptor-mediated signaling pathway",
   "motile cilium",
   "ciliary plasm",
   "external side of plasma membrane",
@@ -538,11 +539,16 @@ terms <- c(
   "microtubule bundle formation",
   "plasma membrane bounded cell projection assembly",
   "cell projection assembly",
+  "cell projection",
   "positive regulation of epidermal growth factor receptor signaling pathway",
   "inner dynein arm assembly",
   "positive regulation of epidermal growth factor-activated receptor activity",
   "extracellular matrix",
   "extracellular region",
+  "extracellular space",
+  "extracellular matrix structural constituent",
+  "collagen-containing extracellular matrix",
+  "external encapsulating structure",
   "synaptic vesicle membrane",
   "exocytic vesicle membrane",
   "cell periphery",
@@ -556,7 +562,8 @@ terms <- c(
   "negative regulation of cell cycle process",
   "DNA repair",
   "neuron differentiation",
-  "chromosome organization"
+  "chromosome organization",
+  "positive regulation of peptidyl-tyrosine phosphorylation"
 )
 
 #### @ FIGURE 1F (MAIN) @ ####
