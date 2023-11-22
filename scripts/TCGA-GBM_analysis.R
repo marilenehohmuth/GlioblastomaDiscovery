@@ -617,4 +617,3 @@ write.csv(
   as.data.frame(ego_down@result), 
   file = paste0(getwd(), "/results/TCGA-GBM/TCGA-GBM_PRNP-High_vs_PRNP-Low_ORA_downregulated_transcripts_padj0.05_BH_correctionMethod.csv")
 )
-
