@@ -1,20 +1,15 @@
 # DOWNLOAD OF OTHER TCGA PROJECTS ###############################################################
 # @ This script downloads RNA-seq data of the following TCGA projects:                          # 
 # @ BRCA, COAD, READ, PRAD, LUAD, KIRC, STAD, HNSC, OV, PAAD, UCEC, BLCA, CHOL, ACC, PCPG, SKCM #                   
-#################################################################################################
 
 
-##########################
-#### Loading packages ####
-##########################
-                                  
+# Loading packages ####
+
 library(TCGAbiolinks)             # 2.23.5
 library(SummarizedExperiment)     # 1.20.0
 
 
-#################################33################
-#### Defining a function to download TCGA data ####
-###################################################
+# Defining a function to download TCGA data ####
 
 download_tcga <- function(project_id) {
 
@@ -57,9 +52,7 @@ download_tcga <- function(project_id) {
 }
 
 
-#################################################
-#### Downloading data from each TCGA project ####
-#################################################
+# Downloading data from each TCGA project ####
 
 # Define TCGA project IDs.
 project_list <- c(
