@@ -13,6 +13,7 @@ library(Hmisc)                    # 5.1_1
 library(ggplot2)                  # 3.4.4
 library(RColorBrewer)             # 1.1_3
 library(ggpubr)                   # 0.6.0
+library(VennDiagram)              # 1.7.3
 
 
 ################################################
@@ -33,7 +34,7 @@ tcga <- tcga$gene_symbol[tcga$classification == "Upregulated"]
 darmanis <- read.csv(
     paste0(getwd(), "/results/darmanis/Darmanis_PRNP+_vs_PRNP-_signature_marker_genes.csv"),
     header = TRUE,
-    row.names = 1
+    row.names = NULL
 )
 # Get upregulated genes in the PRNP+ cell population.
 darmanis <- darmanis$gene[darmanis$population == "PRNP_positive_cells" & darmanis$fc > 0 & darmanis$pval <= 0.05]
@@ -43,7 +44,7 @@ darmanis <- darmanis$gene[darmanis$population == "PRNP_positive_cells" & darmani
 neftel <- read.csv(
     "/nfs/team205/jb62/other/GlioblastomaDiscovery/results/neftel/Neftel_PRNP+_vs_PRNP-_signature_marker_genes.csv",
     header = TRUE,
-    row.names = 1
+    row.names = NULL
 )
 # Get upregulated genes in the PRNP+ cell population.
 neftel <- neftel$gene[neftel$population == "PRNP_positive_cells" & neftel$fc > 0 & neftel$pval <= 0.05]
@@ -53,7 +54,7 @@ neftel <- neftel$gene[neftel$population == "PRNP_positive_cells" & neftel$fc > 0
 richards <- read.csv(
     "/nfs/team205/jb62/other/GlioblastomaDiscovery/results/richards/Richards_PRNP+_vs_PRNP-_signature_marker_genes.csv",
     header = TRUE,
-    row.names = 1
+    row.names = NULL
 )
 # Get upregulated genes in the PRNP+ cell population.
 richards <- richards$gene[richards$population == "PRNP_positive_cells" & richards$fc > 0 & richards$pval <= 0.05]
