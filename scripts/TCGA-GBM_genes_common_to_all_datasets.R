@@ -295,15 +295,42 @@ write.csv(
     file = paste0(getwd(), "/results/comparison_all/all_datasets_common_PRNPhigh_or_positive_upGenes_ORA_enrichGO_ontALL_padj0.05.csv")
 )
 
+# Perform Over-Representation Analysis (ORA).
+comparison_2 <- gost(
+    query = correspondence$SYMBOL, 
+    organism = "hsapiens", 
+    ordered_query = FALSE, 
+    multi_query = FALSE, 
+    significant = TRUE, 
+    exclude_iea = TRUE, 
+    measure_underrepresentation = FALSE,
+    evcodes = FALSE, 
+    user_threshold = 0.05, 
+    correction_method = "g_SCS", 
+    domain_scope = "annotated", 
+    custom_bg = NULL, 
+    numeric_ns = "", 
+    sources = NULL, 
+    as_short_link = FALSE, 
+    highlight = TRUE
+)
+comparison_2$result <- apply(comparison_2$result, 2, as.character)
+
+# Save ORA results to output file.
+write.table(
+    as.data.frame(comparison_2$result), 
+    file = paste0(getwd(), "/results/comparison_all/all_datasets_common_PRNPhigh_or_positive_upGenes_ORA_gProfiler2_ontALL_padj0.05.csv")
+)
+
 # Plot ORA results.
 pdf(
-    paste0(getwd(), "/results/comparison_all/all_datasets_ORA_common_PRNPpositive_upGenes_enrichGO_ontALL_padj0.05_selectedTerms.pdf"),
+    paste0(getwd(), "/results/comparison_all/all_datasets_common_PRNPhigh_or_positive_upGenes_ORA_gProfiler2_padj0.05_allEnrichedTerms.pdf"),
     width = 8,
     height = 8
 )
 ggplot(
-    comparison[grepl("vesicle|transport", comparison$Description),],
-    aes(x = -log10(p.adjust), y = reorder(Description, -log10(p.adjust)), size = Count) 
+    as.data.frame(comparison_2$result),
+    aes(x = -log10(as.numeric(p_value)), y = reorder(term_name, -log10(as.numeric(p_value))), size = as.numeric(intersection_size))
 ) +
     geom_point(shape = 21, color = "black", fill = "palegreen2") +
     theme_bw() +
@@ -313,7 +340,7 @@ ggplot(
         plot.title = element_text(size = 12, face = "bold", hjust = 0.5)
     ) +
     xlab(expression(-log[10]~"(Adjusted p-value)")) +
-    ylab("Gene Ontology (GO) term") +
+    ylab("Term") +
     ggtitle("") +
     scale_size_continuous(range = c(1,5), name = "# Genes") +
     geom_vline(xintercept = -log10(0.05), linetype = "dashed")
