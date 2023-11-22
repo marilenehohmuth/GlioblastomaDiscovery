@@ -1200,12 +1200,12 @@ comparison <- as.data.frame(comparison)
 # Save ORA results to output file.
 write.csv(
     comparison, 
-    file = paste0(getwd(), "/results/comparison_single_cell/single_cell_datasets_ORA_enrichGO_ontALL_padj0.05.csv")
+    file = paste0(getwd(), "/results/comparison_single_cell/single_cell_datasets_common_PRNPpositive_upGenes_ORA_enrichGO_ontALL_padj0.05.csv")
 )
 
 # Plot ORA results.
 pdf(
-    paste0(getwd(), "/results/comparison_single_cell/single_cell_datasets_ORA_enrichGO_ontALL_padj0.05_selectedTerms.pdf"),
+    paste0(getwd(), "/results/comparison_single_cell/single_cell_datasets_ORA_common_PRNPpositive_upGenes_enrichGO_ontALL_padj0.05_selectedTerms.pdf"),
     width = 8,
     height = 8
 )
@@ -1264,6 +1264,54 @@ venn.diagram(
 
 # Find the intersection of all datasets.
 common_genes_positiveCorr_with_prnp <- Reduce(intersect, genes_positiveCorr_with_prnp)
+
+# Save common genes to output file.
+write.csv(
+    common_genes_positiveCorr_with_prnp, 
+    file = paste0(getwd(), "/results/comparison_single_cell/single_cell_datasets_common_genes_positiveCorr_with_PRNP.csv")
+)
+
+# Perform Over-Representation Analysis (ORA).
+comparison <- enrichGO(
+    common_genes_positiveCorr_with_prnp,
+    ont = "ALL",
+    keyType = "SYMBOL",
+    OrgDb = "org.Hs.eg.db",
+    pvalueCutoff = 0.05,
+    pAdjustMethod = "BH"
+)
+comparison <- as.data.frame(comparison)
+
+# Save ORA results to output file.
+write.csv(
+    comparison, 
+    file = paste0(getwd(), "/results/comparison_single_cell/single_cell_datasets_common_genes_positiveCorr_with_PRNP_ORA_enrichGO_ontALL_padj0.05.csv")
+)
+
+# Plot ORA results.
+pdf(
+    paste0(getwd(), "/results/comparison_single_cell/single_cell_datasets_common_genes_positiveCorr_with_PRNP_ORA_enrichGO_ontALL_padj0.05_selectedTerms.pdf"),
+    width = 8,
+    height = 8
+)
+ggplot(
+    comparison[grepl("vesicle|transport", comparison$Description),],
+    aes(x = -log10(p.adjust), y = reorder(Description, -log10(p.adjust)), size = Count) 
+) +
+    geom_point(shape = 21, color = "black", fill = "palegreen2") +
+    theme_bw() +
+    theme(
+        axis.text = element_text(size = 10),
+        axis.title = element_text(size = 12),
+        plot.title = element_text(size = 12, face = "bold", hjust = 0.5)
+    ) +
+    xlab(expression(-log[10]~"(Adjusted p-value)")) +
+    ylab("Gene Ontology (GO) term") +
+    ggtitle("") +
+    scale_size_continuous(range = c(1,5), name = "# Genes") +
+    geom_vline(xintercept = -log10(0.05), linetype = "dashed")
+dev.off()
+
 
 # The End
 sessionInfo()
