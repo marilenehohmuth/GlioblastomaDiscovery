@@ -1,11 +1,11 @@
-library(survminer)
+library(survminer)          ## 0.4-9
 library(ggplot2)
 library(dplyr)
-library(GSVA)
-library(maxstat)
-library(survival)
+library(GSVA)               ## 1.38.1
+library(maxstat)            ## 0.7-25
+library(survival)           ## 3.5-7
 
-pGBM_log_metadata <- readRDS("results/TCGA/PrimaryGBMs_logData+Metadata.RDS")
+pGBM_log_metadata <- readRDS("results/TCGA-GBM/PrimaryGBMs_logData+Metadata.RDS")
 genesets <- read.csv(
     "data/c5.go.v7.5.1.symbols.gmt",
     sep = "\t",
