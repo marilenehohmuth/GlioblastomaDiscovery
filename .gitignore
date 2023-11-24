@@ -4,6 +4,7 @@
 .Ruserdata
 data/*
 !data/sample_info.csv
+!data/c5.go.v7.5.1.symbols.gmt
 MANIFEST.txt
 GDCdata/*
 results/**/*.RDS

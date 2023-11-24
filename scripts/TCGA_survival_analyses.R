@@ -1,11 +1,19 @@
-library(survminer)
+
+# Load packages -----------------------------------------------------------
+
+library(survminer)                # 0.4-9
 library(ggplot2)
 library(dplyr)
-library(GSVA)
-library(maxstat)
-library(survival)
+library(GSVA)                     # 1.38.1
+library(maxstat)                  # 0.7-25
+library(survival)                 # 3.5-7
+library(org.Hs.eg.db)             # 3.17.0
 
-pGBM_log_metadata <- readRDS("results/TCGA/PrimaryGBMs_logData+Metadata.RDS")
+
+
+# Load data ---------------------------------------------------------------
+
+pGBM_log_metadata <- readRDS("results/TCGA-GBM/PrimaryGBMs_logData+Metadata.RDS")
 genesets <- read.csv(
     "data/c5.go.v7.5.1.symbols.gmt",
     sep = "\t",
@@ -14,6 +22,9 @@ genesets <- read.csv(
 genesets <- as.data.frame(t(genesets))
 
 pGBM_log_metadata <- pGBM_log_metadata[pGBM_log_metadata$paper_IDH.status == "WT",]
+
+
+# Signature survival ------------------------------------------------------
 
 signature_survival <- function(geneset.name) {
     genes.list <- list(geneset.name = genesets[,geneset.name][genesets[,geneset.name] != ""])
@@ -72,6 +83,10 @@ signature_survival <- function(geneset.name) {
   return(plot.list)
 }
 
+
+## Calculate signature -----------------------------------------------------
+
+## bug here
 p1 <- signature_survival("GOCC_VESICLE_LUMEN") 
 p2 <- signature_survival("GOBP_EXTRACELLULAR_VESICLE_BIOGENESIS")
 p3 <- signature_survival("GOBP_EXOCYTOSIS")
