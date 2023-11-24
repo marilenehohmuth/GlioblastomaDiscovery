@@ -250,6 +250,11 @@ pGBM_filt_norm <- cpm(pGBM_count_data_filt, log = FALSE)
 pGBM_filt_norm <- pGBM_filt_norm + 1
 pGBM_filt_norm <- log10(pGBM_filt_norm)
 
+# Save filtered data.
+pGBM_metadata_filt <- pGBM_metadata_filt[colnames(pGBM_filt_norm),]
+pGBM_log_metadata_filt <- cbind(t(pGBM_filt_norm), pGBM_metadata_filt)
+saveRDS(pGBM_log_metadata_filt, file = paste0(getwd(), "/results/TCGA-GBM/PrimaryGBMs_logData+Metadata_filtered.RDS"))
+
 # Select row that contains log-normalized PRNP counts.
 PRNP_counts_all <- pGBM_filt_norm["ENSG00000171867.17",]
 
