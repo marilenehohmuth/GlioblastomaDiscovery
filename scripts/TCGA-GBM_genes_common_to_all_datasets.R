@@ -103,6 +103,7 @@ venn.diagram(
 
 # Get genes common to all 4 datasets.
 common_upGenes <- Reduce(intersect, gene_lists)
+write.csv(common_upGenes, paste0(getwd(), "/results/comparison_all/all_datasets_common_PRNPhigh_or_positive_upGenes.csv"))
 
 # Get ENSEMBL IDs.
 correspondence <- select(
@@ -200,7 +201,7 @@ pdf(
     height = 20
 )
 ggplot(
-    df_idh,
+    df_idh[df_idh$symbol != "PRNP",],
     aes(x = idh, y = as.numeric(expression))
 ) +
     geom_violin(aes(fill = idh), scale = "width") +
