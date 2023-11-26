@@ -1074,7 +1074,7 @@ plot_gsea(
     dataset = "richards",
     population_ = "PRNP_positive_cells",
     title = expression("Markers of"~italic("PRNP")~"positive cells"),
-    terms = ,
+    terms = gsea_richards_prnp_pos$Description[grepl("vesicle|transport", gsea_richards_prnp_pos$Description)],
     plot_width = 10,
     plot_height = 8
 )
@@ -1090,7 +1090,7 @@ plot_gsea(
     dataset = "richards",
     population_ = "PRNP_negative_cells",
     title = expression("Markers of"~italic("PRNP")~"negative cells"),
-    terms = ,
+    terms = gsea_richards_prnp_neg$Description[grepl("vesicle|transport", gsea_richards_prnp_neg$Description)],
     plot_width = 10,
     plot_height = 8
 )
@@ -1102,11 +1102,11 @@ ora_richards_prnp_pos <- do_ora(
     population_ = "PRNP_positive_cells"
 )
 plot_ora(
-    gse = ora_richards_prnp_pos,
+    comparison = ora_richards_prnp_pos,
     dataset = "richards",
     population_ = "PRNP_positive_cells",
     title = expression("Markers of"~italic("PRNP")~"positive cells"),
-    terms = ,
+    terms = gsea_richards_prnp_pos$Description[grepl("vesicle|transport", gsea_richards_prnp_pos$Description)],
     plot_width = 10,
     plot_height = 8
 )
@@ -1118,11 +1118,11 @@ ora_richards_prnp_neg <- do_ora(
     population_ = "PRNP_negative_cells"
 )
 plot_ora(
-    gse = ora_richards_prnp_neg,
+    comparison = ora_richards_prnp_neg,
     dataset = "richards",
     population_ = "PRNP_negative_cells",
     title = expression("Markers of"~italic("PRNP")~"negative cells"),
-    terms = ,
+    terms = gsea_richards_prnp_neg$Description[grepl("vesicle|transport", gsea_richards_prnp_neg$Description)],
     plot_width = 10,
     plot_height = 8
 )
