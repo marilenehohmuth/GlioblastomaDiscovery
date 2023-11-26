@@ -17,6 +17,7 @@ library(VennDiagram)              # 1.7.3
 library(dplyr)                    # 1.1.3
 library(clusterProfiler)          # 4.8.1
 library(org.Hs.eg.db)             # 3.17.0
+library(gprofiler2)               # 0.2.2
 
 ################################################
 #### Loading results from all four datasets ####
@@ -199,13 +200,13 @@ for (i in seq_len(nrow(correspondence))) {
 # Create dataframe contaning each gene along with their expression in samples of each IDH subtype.
 df_idh <- data.frame(matrix(nrow = 0, ncol = 0))
 for (gene in correspondence$SYMBOL) {
-    for (expression in pGBM_log_metadata[,gene][pGBM_log_metadata$paper_IDH == "WT"]) {
+    for (expression in pGBM_log_metadata[,gene][pGBM_log_metadata$paper_IDH.status == "WT"]) {
         df_idh <- rbind(df_idh, c(gene, expression, "IDHwt"))
     }
-    for (expression in pGBM_log_metadata[,gene][pGBM_log_metadata$paper_IDH == "Mutant"]) {
+    for (expression in pGBM_log_metadata[,gene][pGBM_log_metadata$paper_IDH.status == "Mutant"]) {
     df_idh <- rbind(df_idh, c(gene, expression, "IDH-mutant"))
     }
-    for (expression in pGBM_log_metadata[,gene][is.na(pGBM_log_metadata$paper_IDH)]) {
+    for (expression in pGBM_log_metadata[,gene][is.na(pGBM_log_metadata$paper_IDH.status)]) {
     df_idh <- rbind(df_idh, c(gene, expression, "Unclassified"))
     }
 }
@@ -249,17 +250,17 @@ dev.off()
 
 # Create dataframe contaning each gene along with their expression in samples of each transcriptional subtype.
 df_subtype <- data.frame(matrix(nrow = 0, ncol = 0))
-for (gene in correspondence$ENSEMBL) {
-    for (expression in pGBM_log_metadata[,gene][pGBM_log_metadata$paper_Transcriptome == "CL"]) {
+for (gene in correspondence$SYMBOL) {
+    for (expression in pGBM_log_metadata[,gene][pGBM_log_metadata$paper_Transcriptome.Subtype == "CL"]) {
         df_subtype <- rbind(df_subtype, c(gene, expression, "Classical"))
     }
-    for (expression in pGBM_log_metadata[,gene][pGBM_log_metadata$paper_Transcriptome == "PN"]) {
+    for (expression in pGBM_log_metadata[,gene][pGBM_log_metadata$paper_Transcriptome.Subtype == "PN"]) {
         df_subtype <- rbind(df_subtype, c(gene, expression, "Proneural"))
     }
-    for (expression in pGBM_log_metadata[,gene][pGBM_log_metadata$paper_Transcriptome == "ME"]) {
+    for (expression in pGBM_log_metadata[,gene][pGBM_log_metadata$paper_Transcriptome.Subtype == "ME"]) {
         df_subtype <- rbind(df_subtype, c(gene, expression, "Mesenchymal"))
     }
-    for (expression in pGBM_log_metadata[,gene][is.na(pGBM_log_metadata$paper_Transcriptome)]) {
+    for (expression in pGBM_log_metadata[,gene][is.na(pGBM_log_metadata$paper_Transcriptome.Subtype)]) {
         df_subtype <- rbind(df_subtype, c(gene, expression, "Unclassified"))
     }
 }
