@@ -512,7 +512,7 @@ do_ora <- function(
     # Get gene lists.
     gene_list <- list(
         "Upregulated" = df$gene[df$fc > 0],
-        "Downregulated" = df$gene[df$fc < 0],
+        "Downregulated" = df$gene[df$fc < 0]
     )
 
     # Perform Over-Representation Analysis (ORA) in the specified population.
@@ -712,7 +712,7 @@ plot_gsea(
     dataset = "darmanis",
     population_ = "PRNP_negative_cells",
     title = expression("Markers of"~italic("PRNP")~"negative cells"),
-    terms = ,
+    terms = gsea_darmanis_prnp_neg$Description[grepl("vesicle|transport", gsea_darmanis_prnp_neg$Description)],
     plot_width = 10,
     plot_height = 8
 )
@@ -724,11 +724,11 @@ ora_darmanis_prnp_pos <- do_ora(
     population_ = "PRNP_positive_cells"
 )
 plot_ora(
-    gse = ora_darmanis_prnp_pos,
+    comparison = ora_darmanis_prnp_pos,
     dataset = "darmanis",
     population_ = "PRNP_positive_cells",
     title = expression("Markers of"~italic("PRNP")~"positive cells"),
-    terms = ,
+    terms = gsea_darmanis_prnp_pos$Description[grepl("vesicle|transport", gsea_darmanis_prnp_pos$Description)],
     plot_width = 10,
     plot_height = 8
 )
@@ -740,11 +740,11 @@ ora_darmanis_prnp_neg <- do_ora(
     population_ = "PRNP_negative_cells"
 )
 plot_ora(
-    gse = ora_darmanis_prnp_neg,
+    comparison = ora_darmanis_prnp_neg,
     dataset = "darmanis",
     population_ = "PRNP_negative_cells",
     title = expression("Markers of"~italic("PRNP")~"negative cells"),
-    terms = ,
+    terms = gsea_darmanis_prnp_neg$Description[grepl("vesicle|transport", gsea_darmanis_prnp_neg$Description)],
     plot_width = 10,
     plot_height = 8
 )
