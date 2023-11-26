@@ -1233,14 +1233,14 @@ dev.off()
 genes_positiveCorr_with_prnp <- list(
     "darmanis" = df_darmanis$gene2[df_darmanis$status == "Positive correlation"],
     "neftel" = df_neftel$gene2[df_neftel$status == "Positive correlation"],
-    "richards" = df_richards$gene2[df_richards$status == "Positive correlation"],
+    "richards" = df_richards$gene2[df_richards$status == "Positive correlation"]
 )
 
 # Create Venn diagram.
 venn.diagram(
     x = genes_positiveCorr_with_prnp,
     category.names = c("Darmanis" , "Neftel" , "Richards"),
-    filename = 'common_genes_positiveCorr_with_PRNP.png',
+    filename = '/results/comparison_single_cell/common_genes_positiveCorr_with_PRNP.png',
     output = TRUE,
     imagetype = "png" ,
     height = 480 , 
@@ -1249,7 +1249,7 @@ venn.diagram(
     compression = "lzw",
     lwd = 2,
     lty = 'blank',
-    fill = brewer.pal(3, "Pastel1")
+    fill = brewer.pal(3, "Pastel1"),
     cex = 0.6,
     fontface = "bold",
     fontfamily = "sans",
