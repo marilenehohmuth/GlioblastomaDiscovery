@@ -44,7 +44,7 @@ darmanis <- darmanis$gene[darmanis$population == "PRNP_positive_cells" & darmani
 
 # Load PRNP+ and PRNP- marker genes (Neftel et al, single-cell RNA-seq)
 neftel <- read.csv(
-    "/nfs/team205/jb62/other/GlioblastomaDiscovery/results/neftel/Neftel_PRNP+_vs_PRNP-_signature_marker_genes.csv",
+    paste0(getwd(), "/results/neftel/Neftel_PRNP+_vs_PRNP-_signature_marker_genes.csv"),
     header = TRUE,
     row.names = NULL
 )
@@ -54,7 +54,7 @@ neftel <- neftel$gene[neftel$population == "PRNP_positive_cells" & neftel$fc > 0
 
 # Load PRNP+ and PRNP- marker genes (Richards et al, single-cell RNA-seq)
 richards <- read.csv(
-    "/nfs/team205/jb62/other/GlioblastomaDiscovery/results/richards/Richards_PRNP+_vs_PRNP-_signature_marker_genes.csv",
+    paste0(getwd(), "/results/richards/Richards_PRNP+_vs_PRNP-_signature_marker_genes.csv"),
     header = TRUE,
     row.names = NULL
 )
@@ -76,16 +76,17 @@ gene_lists <- list(
 ##################################################################
 
 # Create Venn diagram.
-venn.diagram(
+v <- venn.diagram(
     x = gene_lists,
     category.names = c("TCGA", "Darmanis" , "Neftel" , "Richards"),
-    filename = paste0(getwd(), '/results/comparison_all/all_datasets_common_genes_vennDiagram.png'),
-    output = TRUE,
-    imagetype = "png" ,
-    height = 480 ,
-    width = 480 ,
-    resolution = 300,
-    compression = "lzw",
+    filename = NULL,
+    # filename = paste0(getwd(), '/results/comparison_all/all_datasets_common_genes_vennDiagram.png'),
+    # output = TRUE,
+    # imagetype = "png" ,
+    # height = 480 ,
+    # width = 480 ,
+    # resolution = 300,
+    # compression = "lzw",
     lwd = 2,
     lty = 'blank',
     fill = brewer.pal(4, "Pastel1"),
@@ -95,33 +96,46 @@ venn.diagram(
     cat.cex = 0.6,
     cat.fontface = "bold",
     cat.default.pos = "outer",
-    cat.pos = c(-27, 27, 135, -135),
-    cat.dist = c(0.055, 0.055, 0.085, 0.085),
-    cat.fontfamily = "sans",
-    rotation = 1
+    # cat.pos = c(-27, 27, 200, -135),
+    # cat.dist = c(0.055, 0.055, 0.085, 0.085),
+    cat.fontfamily = "sans"
 )
+pdf(paste0(getwd(), '/results/comparison_all/all_datasets_common_genes_vennDiagram.pdf'))
+grid.newpage()
+pushViewport(viewport(width=unit(0.8, "npc"), height = unit(0.8, "npc")))
+grid.draw(v)
+dev.off()
 
 # Get genes common to all 4 datasets.
 common_upGenes <- Reduce(intersect, gene_lists)
 write.csv(common_upGenes, paste0(getwd(), "/results/comparison_all/all_datasets_common_PRNPhigh_or_positive_upGenes.csv"))
 
-# Get ENSEMBL IDs.
-correspondence <- select(
-    org.Hs.eg.db,
-    keys = common_upGenes,
-    columns = "ENSEMBL",
-    keytype = "SYMBOL"
-)
-
 # Load TCGA-GBM data (including primary and recurrrent tumors & non-neoplastic tissue).
 tissue.log.metadata <- readRDS(paste0(getwd(), "/results/TCGA-GBM/Tissue_logData+Metadata.RDS"))
 
-# Removing version identifier from ENSEMBL IDs.
-colnames(tissue.log.metadata) <- gsub("\\..*", "", colnames(tissue.log.metadata))
+## removing version identifier from ENSEMBL IDs.
+ensg_idx <- grep("^ENSG", colnames(tissue.log.metadata))
+start_ensg <- ensg_idx[1]
+gene_ids <- sub("\\..*", "", colnames(tissue.log.metadata)[ensg_idx])
+colnames(tissue.log.metadata)[ensg_idx] <- gene_ids
+
+## getting correspondence between ENSEMBL IDs and gene symbols.
+# Get ENSEMBL IDs.
+correspondence <- select(
+  org.Hs.eg.db,
+  keys = common_upGenes,
+  columns = "ENSEMBL",
+  keytype = "SYMBOL"
+)
+
+## replace column names
+for (i in seq_len(nrow(correspondence))) {
+  names(tissue.log.metadata)[names(tissue.log.metadata) == correspondence$ENSEMBL[i]] <- correspondence$SYMBOL[i]
+}
 
 # Create dataframe contaning each gene along with their expression in samples of each tissue type.
 df_tissues <- data.frame(matrix(nrow = 0, ncol = 0))
-for (gene in correspondence$ENSEMBL) {
+for (gene in correspondence$SYMBOL) {
     for (expression in tissue.log.metadata[,gene][tissue.log.metadata$definition == "Primary solid Tumor"]) {
         df_tissues <- rbind(df_tissues, c(gene, expression, "Primary"))
     }
@@ -169,21 +183,29 @@ ggplot(
 dev.off()
 
 # Load TCGA-GBM data (including only primary tumors).
-pGBM.log.metadata <- readRDS(paste0(getwd(), "/results/TCGA-GBM/PrimaryGBMs_logData+Metadata.RDS"))
+pGBM_log_metadata <- readRDS(paste0(getwd(), "/results/TCGA-GBM/PrimaryGBMs_logData+Metadata.RDS"))
 
-# Removing version identifier from ENSEMBL IDs.
-colnames(pGBM.log.metadata) <- gsub("\\..*", "", colnames(pGBM.log.metadata))
+## removing version identifier from ENSEMBL IDs.
+ensg_idx <- grep("^ENSG", colnames(pGBM_log_metadata))
+start_ensg <- ensg_idx[1]
+gene_ids <- sub("\\..*", "", colnames(pGBM_log_metadata)[ensg_idx])
+colnames(pGBM_log_metadata)[ensg_idx] <- gene_ids
+
+## replace column names
+for (i in seq_len(nrow(correspondence))) {
+  names(pGBM_log_metadata)[names(pGBM_log_metadata) == correspondence$ENSEMBL[i]] <- correspondence$SYMBOL[i]
+}
 
 # Create dataframe contaning each gene along with their expression in samples of each IDH subtype.
 df_idh <- data.frame(matrix(nrow = 0, ncol = 0))
-for (gene in correspondence$ENSEMBL) {
-    for (expression in pGBM.log.metadata[,gene][pGBM.log.metadata$paper_IDH == "WT"]) {
+for (gene in correspondence$SYMBOL) {
+    for (expression in pGBM_log_metadata[,gene][pGBM_log_metadata$paper_IDH == "WT"]) {
         df_idh <- rbind(df_idh, c(gene, expression, "IDHwt"))
     }
-    for (expression in pGBM.log.metadata[,gene][pGBM.log.metadata$paper_IDH == "Mutant"]) {
+    for (expression in pGBM_log_metadata[,gene][pGBM_log_metadata$paper_IDH == "Mutant"]) {
     df_idh <- rbind(df_idh, c(gene, expression, "IDH-mutant"))
     }
-    for (expression in pGBM.log.metadata[,gene][is.na(pGBM.log.metadata$paper_IDH)]) {
+    for (expression in pGBM_log_metadata[,gene][is.na(pGBM_log_metadata$paper_IDH)]) {
     df_idh <- rbind(df_idh, c(gene, expression, "Unclassified"))
     }
 }
@@ -228,16 +250,16 @@ dev.off()
 # Create dataframe contaning each gene along with their expression in samples of each transcriptional subtype.
 df_subtype <- data.frame(matrix(nrow = 0, ncol = 0))
 for (gene in correspondence$ENSEMBL) {
-    for (expression in pGBM.log.metadata[,gene][pGBM.log.metadata$paper_Transcriptome == "CL"]) {
+    for (expression in pGBM_log_metadata[,gene][pGBM_log_metadata$paper_Transcriptome == "CL"]) {
         df_subtype <- rbind(df_subtype, c(gene, expression, "Classical"))
     }
-    for (expression in pGBM.log.metadata[,gene][pGBM.log.metadata$paper_Transcriptome == "PN"]) {
+    for (expression in pGBM_log_metadata[,gene][pGBM_log_metadata$paper_Transcriptome == "PN"]) {
         df_subtype <- rbind(df_subtype, c(gene, expression, "Proneural"))
     }
-    for (expression in pGBM.log.metadata[,gene][pGBM.log.metadata$paper_Transcriptome == "ME"]) {
+    for (expression in pGBM_log_metadata[,gene][pGBM_log_metadata$paper_Transcriptome == "ME"]) {
         df_subtype <- rbind(df_subtype, c(gene, expression, "Mesenchymal"))
     }
-    for (expression in pGBM.log.metadata[,gene][is.na(pGBM.log.metadata$paper_Transcriptome)]) {
+    for (expression in pGBM_log_metadata[,gene][is.na(pGBM_log_metadata$paper_Transcriptome)]) {
         df_subtype <- rbind(df_subtype, c(gene, expression, "Unclassified"))
     }
 }
