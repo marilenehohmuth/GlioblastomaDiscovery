@@ -12,10 +12,10 @@ library(edgeR)                    # 3.32.1
 library(ggplot2)                  # 3.3.5 
 library(dplyr)                    # 1.0.7 
 library(ggpubr)                   # 0.4.0
-library(biomaRt)                  # 2.46.3 
 library(GSVA)                     # 1.38.2
-library(Hmisc)                    #
-library(RColorBrewer)             #
+library(Hmisc)                    # 5.1_1
+library(RColorBrewer)             # 1.1_3
+library(org.Hs.eg.db)             # 3.17.0
 
 
 ########################################################################
@@ -28,30 +28,29 @@ process_tcga <- function(
 ) {
   
   # Read count data.
-  count_data <- readRDS("data/other_tumours/", project_id, "/TCGA-", project_id, "_count_data.RDS")
+  count_data <- readRDS(paste0(getwd(), "/data/other_tumors/", project_id, "/TCGA-", project_id, "_count_data.RDS"))
+  count_data$ensembl <- gsub("\\..*", "", rownames(count_data))
 
   # Read metadata.
-  metadata <- readRDS("data/other_tumours/", project_id, "/TCGA-", project_id, "_metadata.RDS")
+  metadata <- readRDS(paste0(getwd(), "/data/other_tumors/", project_id, "/TCGA-", project_id, "_metadata.RDS"))
 
   # Get correspondence between ENSEMBL IDs and gene symbols.
-  genemap <- getBM(
-    filters = c("ensembl_gene_id"),
-    attributes = c("ensembl_gene_id", "hgnc_symbol"),
-    values = rownames(count_data), 
-    mart = ensembl
+  correspondence <- AnnotationDbi::select(
+    org.Hs.eg.db, 
+    keys = count_data$ensembl, 
+    columns = "SYMBOL", 
+    keytype = "ENSEMBL"
   )
 
-  # Get correspondence between ENSEMBL IDs in count_data and in genemap.
-  idx <- match(rownames(count_data), genemap$ensembl_gene_id)
-
   # Add gene symbols to count_data.
-  count_data$hgnc_symbol <- genemap$hgnc_symbol[idx]
+  count_data$hgnc_symbol <- correspondence$SYMBOL[match(count_data$ensembl, correspondence$ENSEMBL)]
 
   # Add gene symbols as row names, allowing duplicate row names by appending a suffix to repeated gene symbols.
   rownames(count_data) <- make.names(count_data$hgnc_symbol, unique = TRUE)
   
   # Remove column that has gene symbols, as these have been added as row names.
   count_data$hgnc_symbol <- NULL
+  count_data$ensembl <- NULL
 
   # Keep only primary tumours in the metadata table.
   metadata <- metadata %>% dplyr::filter(definition == "Primary solid Tumor")
@@ -86,7 +85,7 @@ process_tcga <- function(
     stage_metadata <- metadata %>% filter(tumor_stage == stage)
     
     # Subset normalized count data to the given stage.
-    stage_norm_count_data <- norm_count_data %>% select(rownames(stage_metadata))
+    stage_norm_count_data <- norm_count_data %>% dplyr::select(rownames(stage_metadata))
     
     # Calculate GSVA scores for the given gene sets.
     stage_gsva <- gsva(as.matrix(stage_norm_count_data), genesets)
@@ -113,9 +112,10 @@ process_tcga <- function(
     corr_prnp <- cbind(
       corr_prnp, 
       tumor = as.vector(rep(project_id, times = nrow(corr_prnp))), 
-      stage = as.vector(rep(s[[1]][2], times = nrow(corr_prnp)),
-      process = rownames(corr_prnp))
+      stage = as.vector(rep(s[[1]][2], times = nrow(corr_prnp))),
+      process = rownames(corr_prnp)
     )
+
 
     # Add stage results to the project-wide dataframe.
     project_df <- rbind(project_df, corr_prnp)
@@ -132,7 +132,7 @@ process_tcga <- function(
 
 # Read gene sets file.
 genesets <- read.csv(
-  "data/c5.go.v7.5.1.symbols.gmt",
+  paste0(getwd(), "/data/c5.go.v7.5.1.symbols.gmt"),
   header = FALSE,
   row.names = 1,
   sep = "\t",
@@ -148,7 +148,8 @@ traffic_genesets <- genesets %>% dplyr::select(
   GOBP_INTRACELLULAR_TRANSPORT, GOBP_INTRACELLULAR_PROTEIN_TRANSPORT, GOBP_TRANSPORT_ALONG_MICROTUBULE,
   GOCC_VESICLE_LUMEN, GOCC_VESICLE_MEMBRANE, GOBP_VESICLE_ORGANIZATION, GOBP_VESICLE_TARGETING,
   GOBP_VESICLE_DOCKING, GOCC_CLATHRIN_COATED_VESICLE, GOCC_COPI_COATED_VESICLE, GOBP_VESICLE_TETHERING,
-  GOBP_INTERCELLULAR_TRANSPORT, GOBP_REGULATION_OF_VESICLE_FUSION)
+  GOBP_INTERCELLULAR_TRANSPORT, GOBP_REGULATION_OF_VESICLE_FUSION
+)
 
 # Change gene set names from upper to lower case.
 genesets_list <- list()
@@ -159,10 +160,6 @@ for (column in colnames(traffic_genesets)) {
 names(genesets_list) <- gsub(x = names(genesets_list), pattern = c("gobp_"), replacement = "")
 names(genesets_list) <- gsub(x = names(genesets_list), pattern = c("gocc_"), replacement = "")
 names(genesets_list) <- gsub(x = names(genesets_list), pattern = c("_"), replacement = " ")
-
-# Determine biomaRt settings.
-ensembl <- useMart("ensembl")
-ensembl = useDataset("hsapiens_gene_ensembl",  mart = ensembl)
 
 
 ####################################################
@@ -182,7 +179,7 @@ for(project in project_list) {
       project_id = project,
       genesets = genesets_list
     )
-    corr_all_projects <- rbind(corr_project)
+    corr_all_projects <- rbind(corr_all_projects, corr_project)
 }
 
 # Save results to output file.
@@ -194,18 +191,22 @@ write.csv(corr_all_projects, file = "results/TCGA/other_tumors/TCGA_correlation_
 ##########################
 
 labs <- c(
-  "Breast", "Colon", "Rectum", "Prostate", "Lung", "Kidney", "Stomach", 
-  "Head and neck", "Ovary", "Pancreas", "Uterus", "Bladder", "Gallbladder", 
-  "Adrenal gland", "Skin"
+  "Breast", "Colon", "Rectum"
+  
+  #"Prostate", "Lung", "Kidney", "Stomach", 
+  #"Head and neck", "Ovary", "Pancreas", "Uterus", "Bladder", "Gallbladder", 
+  #"Adrenal gland", "Skin"
 )
 names(labs) <- c(
-  "BRCA", "COAD", "READ", "PRAD", "LUAD", "KIRC", "STAD", "HNSC", "OV",
-  "PAAD", "UCEC", "BLCA", "CHOL", "ACC", "SKCM")
+  "BRCA", "COAD", "READ")
+  
+ #  "PRAD", "LUAD", "KIRC", "STAD", "HNSC", "OV",
+ # "PAAD", "UCEC", "BLCA", "CHOL", "ACC", "SKCM")
 
 #### @ FIGURE S8 (SUPPLEMENTAL) @ #### 
 # Plotting the correlation between PRNP expression and traffic/vesicle signatures in
 # various tumour types from TCGA.
-pdf("results/TCGA/other_tumors/TCGA_correlation_PRNPvsTrafficGenesets.pdf",
+pdf(paste0(getwd(), "/results/TCGA_other/TCGA_correlation_PRNPvsTrafficGenesets.pdf"),
     width = 6.5,
     height = 15)
 ggplot(
@@ -233,7 +234,7 @@ ggplot(
     scales = "free",
     space = "free", 
     labeller = labeller(tumor = labs)
-    ) +
+  ) +
   xlab(NA) +
   ylab(NA)
 dev.off()
