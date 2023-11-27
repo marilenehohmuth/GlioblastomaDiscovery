@@ -10,3 +10,4 @@ GDCdata/*
 results/**/*.RDS
 results/**/*.R
 results/**/*.log
+*.log
