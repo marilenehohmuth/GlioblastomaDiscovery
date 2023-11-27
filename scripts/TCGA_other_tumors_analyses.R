@@ -237,4 +237,245 @@ ggplot(
   ) +
   xlab(NA) +
   ylab(NA)
+=======
+# ANALYSIS OF OTHER TCGA PROJECTS ###############################################################
+# @ This script does the analysis of RNA-seq data of the following TCGA projects:               # 
+# @ BRCA, COAD, READ, PRAD, LUAD, KIRC, STAD, HNSC, OV, PAAD, UCEC, BLCA, CHOL, ACC, PCPG, SKCM #                   
+#################################################################################################
+
+
+##########################
+#### Loading packages ####
+##########################
+
+library(edgeR)                    # 3.32.1
+library(ggplot2)                  # 3.3.5 
+library(dplyr)                    # 1.0.7 
+library(ggpubr)                   # 0.4.0
+library(biomaRt)                  # 2.46.3 
+library(GSVA)                     # 1.38.2
+library(Hmisc)                    #
+library(RColorBrewer)             #
+
+
+########################################################################
+#### Defining a function to process the data of other TCGA projects ####
+########################################################################
+
+process_tcga <- function(
+  project_id, # TCGA project ID.
+  genesets # List of gene sets to be considered in gene set variation analysis (GSVA).
+) {
+  
+  # Read count data.
+  count_data <- readRDS(paste0("data/other_tumors/", project_id, "/TCGA-", project_id, "_count_data.RDS"))
+
+  # Read metadata.
+  metadata <- readRDS(paste0("data/other_tumors/", project_id, "/TCGA-", project_id, "_metadata.RDS"))
+
+  # Get correspondence between ENSEMBL IDs and gene symbols.
+  genemap <- getBM(
+    filters = c("ensembl_gene_id"),
+    attributes = c("ensembl_gene_id", "hgnc_symbol"),
+    values = rownames(count_data), 
+    mart = ensembl
+  )
+
+  # Get correspondence between ENSEMBL IDs in count_data and in genemap.
+  idx <- match(rownames(count_data), genemap$ensembl_gene_id)
+
+  # Add gene symbols to count_data.
+  count_data$hgnc_symbol <- genemap$hgnc_symbol[idx]
+
+  # Add gene symbols as row names, allowing duplicate row names by appending a suffix to repeated gene symbols.
+  rownames(count_data) <- make.names(count_data$hgnc_symbol, unique = TRUE)
+  
+  # Remove column that has gene symbols, as these have been added as row names.
+  count_data$hgnc_symbol <- NULL
+
+  # Keep only primary tumours in the metadata table.
+  metadata <- metadata %>% dplyr::filter(definition == "Primary solid Tumor")
+
+  # Keep only primary tumours in the count data table.
+  count_data <- count_data %>% dplyr::select(rownames(metadata))
+  
+  # CPM-normalize count data.
+  norm_count_data <- cpm(count_data, log = FALSE)
+
+  # Sum 1 to all CPM-normalized counts in order to prevent issues with log-transformation.
+  norm_count_data <- norm_count_data + 1
+
+  # Log-transforming CPM-normalized count data.
+  norm_count_data <- as.data.frame(log10(norm_count_data))
+
+  # Adjust the name of the column that contains tumor pathological stages.
+  if("ajcc_pathologic_stage" %in% colnames(metadata)) {
+    colnames(metadata)[colnames(metadata) == "ajcc_pathologic_stage"] <- "tumor_stage"
+  } else if("figo_stage" %in% colnames(metadata)) {
+    colnames(metadata)[colnames(metadata) == "figo_stage"] <- "tumor_stage"
+  }
+
+  # Iterate over each pathological stage available for the given tumor...
+  project_df <- data.frame()
+  for(stage in metadata$tumor_stage[!is.na(metadata$tumor_stage)] %>% unique) {
+
+    # Skip stage if there are only 4 samples or less (this number is not enough for correlation analysis).
+    if(table(metadata$tumor_stage)[stage] <= 4) next
+
+    # Subset metadata to the given stage.
+    stage_metadata <- metadata %>% dplyr::filter(tumor_stage == stage)
+    
+    # Subset normalized count data to the given stage.
+    stage_norm_count_data <- norm_count_data %>% dplyr::select(rownames(stage_metadata))
+    
+    # Calculate GSVA scores for the given gene sets.
+    stage_gsva <- gsva(as.matrix(stage_norm_count_data), genesets)
+
+    # Add PRNP to GSVA table.
+    stage_gsva <- cbind(t(stage_gsva), as.data.frame(t(stage_norm_count_data["PRNP",])))
+
+    # Add metadata to GSVA table.
+    stage_gsva <- cbind(stage_gsva, stage_metadata)
+
+    # Number of columns to be included in the correlation analysis below (number of gene sets + PRNP column).
+    n_columns <- length(genesets) + 1
+
+    # Calculate Spearman correlations in the matrix
+    corr <- rcorr(as.matrix(stage_gsva[,1:n_columns]), type = "spearman")
+
+    # Put correlation coefficients and p-values related to PRNP in a dataframe.  
+    corr_prnp <- cbind(corr$r["PRNP",], corr$P["PRNP",])
+    colnames(corr_prnp) <- c("correlation", "pvalue")
+    corr_prnp <- corr_prnp[rownames(corr_prnp) != "PRNP",] # Exclude because this line is PRNP vs PRNP.
+
+    # Add more information to the dataframe.
+    s <- strsplit(stage, split = " ")
+    corr_prnp <- cbind(
+      corr_prnp, 
+      tumor = as.vector(rep(project_id, times = nrow(corr_prnp))), 
+      stage = as.vector(rep(s[[1]][2], times = nrow(corr_prnp)),
+      process = rownames(corr_prnp))
+    )
+
+    # Add stage results to the project-wide dataframe.
+    project_df <- rbind(project_df, corr_prnp)
+  }
+
+  # Return project-wide dataframe containing the correlation between PRNP and the given gene sets.
+  return(project_df)
+}                            
+
+
+###########################
+#### Prepare gene sets ####
+###########################
+
+# Read gene sets file.
+genesets <- read.csv(
+  "data/c5.go.v7.5.1.symbols.gmt",
+  header = FALSE,
+  row.names = 1,
+  sep = "\t",
+  check.names = FALSE
+)
+# Transpose dataframe to have gene set names as column names.
+genesets <- as.data.frame(t(genesets))
+
+# Select gene sets related to traffic and vesicles.
+traffic_genesets <- genesets %>% dplyr::select(
+  GOCC_COATED_VESICLE, GOCC_ENDOCYTIC_VESICLE, GOCC_PHAGOCYTIC_VESICLE, GOCC_SECRETORY_VESICLE,
+  GOBP_VESICLE_CYTOSKELETAL_TRAFFICKING, GOBP_EXOCYTOSIS, GOBP_ENDOCYTOSIS, GOBP_SECRETION,
+  GOBP_INTRACELLULAR_TRANSPORT, GOBP_INTRACELLULAR_PROTEIN_TRANSPORT, GOBP_TRANSPORT_ALONG_MICROTUBULE,
+  GOCC_VESICLE_LUMEN, GOCC_VESICLE_MEMBRANE, GOBP_VESICLE_ORGANIZATION, GOBP_VESICLE_TARGETING,
+  GOBP_VESICLE_DOCKING, GOCC_CLATHRIN_COATED_VESICLE, GOCC_COPI_COATED_VESICLE, GOBP_VESICLE_TETHERING,
+  GOBP_INTERCELLULAR_TRANSPORT, GOBP_REGULATION_OF_VESICLE_FUSION)
+
+# Change gene set names from upper to lower case.
+genesets_list <- list()
+for (column in colnames(traffic_genesets)) {
+  genesets_list[[tolower(column)]] <- traffic_genesets[,column][traffic_genesets[,column] != ""]
+}
+# Further refine gene set names.
+names(genesets_list) <- gsub(x = names(genesets_list), pattern = c("gobp_"), replacement = "")
+names(genesets_list) <- gsub(x = names(genesets_list), pattern = c("gocc_"), replacement = "")
+names(genesets_list) <- gsub(x = names(genesets_list), pattern = c("_"), replacement = " ")
+
+# Determine biomaRt settings.
+ensembl <- useMart("ensembl")
+ensembl = useDataset("hsapiens_gene_ensembl",  mart = ensembl)
+
+
+####################################################
+#### Processing the data of other TCGA projects ####
+####################################################
+
+# Define TCGA project IDs.
+project_list <- c(
+    "BRCA", "COAD", "READ", "PRAD", "LUAD", "KIRC", "STAD", "HNSC", 
+    "OV", "PAAD", "UCEC", "BLCA", "CHOL", "ACC", "PCPG", "SKCM"
+)
+
+## bug: gsva with expression data matrix withough gene names
+# Process each TCGA project...
+corr_all_projects <- data.frame()
+for(project in project_list) {
+    corr_project <- process_tcga(
+      project_id = project,
+      genesets = genesets_list
+    )
+    corr_all_projects <- rbind(corr_project)
+}
+
+# Save results to output file.
+write.csv(corr_all_projects, file = "results/TCGA/other_tumors/TCGA_correlation_PRNPvsTrafficGenesets.csv")
+
+
+##########################
+#### Plotting results ####
+##########################
+
+labs <- c(
+  "Breast", "Colon", "Rectum", "Prostate", "Lung", "Kidney", "Stomach", 
+  "Head and neck", "Ovary", "Pancreas", "Uterus", "Bladder", "Gallbladder", 
+  "Adrenal gland", "Skin"
+)
+names(labs) <- c(
+  "BRCA", "COAD", "READ", "PRAD", "LUAD", "KIRC", "STAD", "HNSC", "OV",
+  "PAAD", "UCEC", "BLCA", "CHOL", "ACC", "SKCM")
+
+#### @ FIGURE S8 (SUPPLEMENTAL) @ #### 
+# Plotting the correlation between PRNP expression and traffic/vesicle signatures in
+# various tumour types from TCGA.
+pdf("results/TCGA/other_tumors/TCGA_correlation_PRNPvsTrafficGenesets.pdf",
+    width = 6.5,
+    height = 15)
+ggplot(
+  corr_all_projects,
+  aes(x = process, y = stage)
+) +
+  geom_point(
+    aes(fill = as.numeric(correlation),  size = -log10(as.numeric(pvalue))), shape = 21, color = "black") +
+  scale_fill_gradientn(
+    limits = c(min(as.numeric(corr_all_projects$correlation)), max(as.numeric(corr_all_projects$correlation))),
+    colors = colorRampPalette(rev(brewer.pal(9, "RdBu")))(1000),
+    name = "Spearman correlation"
+  ) +
+  scale_size_continuous(limits = c(-log10(0.05), 30), name = expression(-log[10](p-value))) +
+  theme_bw() +
+  theme(
+    legend.position = "bottom",
+    legend.key.width = unit(1, 'cm'),
+    axis.text.x = element_text(angle = 35, hjust = 1, vjust = 1),
+    strip.text.y = element_text(angle = 0, hjust = 0.5, vjust = 0.5)
+  ) + 
+  guides(fill = guide_colorbar(title.position = "top"), size = guide_legend(title.position = "top")) +
+  facet_grid(
+    rows = vars(tumor), 
+    scales = "free",
+    space = "free", 
+    labeller = labeller(tumor = labs)
+    ) +
+  xlab(NA) +
+  ylab(NA)
+>>>>>>> fc3d24a956ce3ab02c42a559d93cc89db2e5f301
 dev.off()

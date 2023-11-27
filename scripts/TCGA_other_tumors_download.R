@@ -5,7 +5,7 @@
 
 # Loading packages ####
 
-library(TCGAbiolinks)             # 2.23.5
+library(TCGAbiolinks)             # 2.28.3
 library(SummarizedExperiment)     # 1.20.0
 
 
@@ -35,6 +35,7 @@ download_tcga <- function(project_id) {
     # Get metadata.
     metadata <- as.data.frame(colData(data))
 
+    # Create directory for project.
     if(!dir.exists(paste0(getwd(), "/data/other_tumors/", project_id))) dir.create(paste0(getwd(), "/data/other_tumors/", project_id))
 
     # Define prefix for output file names.  
