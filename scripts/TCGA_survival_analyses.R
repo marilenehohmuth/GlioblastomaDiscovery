@@ -25,7 +25,7 @@ genesets <- read.csv(
     header = FALSE,
     row.names = 1)
 
-# Remove column that contains accession links & transpose datafrae.
+# Remove column that contains accession links & transpose dataframe.
 genesets$V2 <- NULL 
 genesets <- as.data.frame(t(genesets))
 
