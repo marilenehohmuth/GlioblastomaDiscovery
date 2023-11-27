@@ -147,9 +147,9 @@ pGBM.idh.prnp <- ggplot(
     name = "IDH status",
     values = c("#00BFC4", "#F8766D", "#E5E0E4"),
     labels = c(
-      paste0("IDH-mutant (n=", nrow(pGBM_log_metadata[pGBM_log_metadata$paper_IDH.status == "Mutant",]), ")"), 
-      paste0("IDHwt (n=", nrow(pGBM_log_metadata[pGBM_log_metadata$paper_IDH.status == "WT",]), ")"),
-      paste0("Unclassified (n=", nrow(pGBM_log_metadata[is.na(pGBM_log_metadata$paper_IDH.status),]), ")")
+      paste0("IDH-mutant (n=", length(unique(pGBM_log_metadata$sample_submitter_id[pGBM_log_metadata$paper_IDH.status == "Mutant"])), ")"), 
+      paste0("IDHwt (n=", length(unique(pGBM_log_metadata$sample_submitter_id[pGBM_log_metadata$paper_IDH.status == "WT"])), ")"),
+      paste0("Unclassified (n=", length(unique(pGBM_log_metadata$sample_submitter_id[is.na(pGBM_log_metadata$paper_IDH.status)])), ")")
     )
   ) +
   stat_compare_means( # Kruskal-Wallis test
@@ -198,10 +198,10 @@ pGBM.sub.prnp <- ggplot(
     name = "Transcriptional subtype",
     values = c("#F8766D", "#7CAE00", "#C77CFF", "#E5E0E4"),
     labels = c(
-      paste0("Classical (n=", nrow(pGBM_log_metadata[pGBM_log_metadata$paper_Transcriptome.Subtype_clean == "CL",]), ")"), 
-      paste0("Mesenchymal (n=", nrow(pGBM_log_metadata[pGBM_log_metadata$paper_Transcriptome.Subtype_clean == "ME",]), ")"),
-      paste0("Proneural (n=", nrow(pGBM_log_metadata[pGBM_log_metadata$paper_Transcriptome.Subtype_clean == "PN",]), ")"),
-      paste0("Unclassified (n=", nrow(pGBM_log_metadata[is.na(pGBM_log_metadata$paper_Transcriptome.Subtype_clean),]), ")")
+      paste0("Classical (n=", length(unique(pGBM_log_metadata$sample_submitter_id[pGBM_log_metadata$paper_Transcriptome.Subtype_clean == "CL"])), ")"), 
+      paste0("Mesenchymal (n=", length(unique(pGBM_log_metadata$sample_submitter_id[pGBM_log_metadata$paper_Transcriptome.Subtype_clean == "ME"])), ")"),
+      paste0("Proneural (n=", length(unique(pGBM_log_metadata$sample_submitter_id[pGBM_log_metadata$paper_Transcriptome.Subtype_clean == "PN"])), ")"),
+      paste0("Unclassified (n=", length(unique(pGBM_log_metadata$sample_submitter_id[is.na(pGBM_log_metadata$paper_Transcriptome.Subtype_clean)])), ")")
     )
   )
 
@@ -404,7 +404,7 @@ deg.all <- deg.all %>% dplyr::filter(!is.na(padj))
 deg.all$ensembl <- gsub("\\..*", "", rownames(deg.all))
 
 # Getting correspondence between ENSEMBL IDs and gene symbols.
-correspondence <- select(
+correspondence <- AnnotationDbi::select(
   org.Hs.eg.db, 
   keys = deg.all$ensembl, 
   columns = "SYMBOL", 
