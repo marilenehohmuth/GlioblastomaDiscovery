@@ -147,9 +147,9 @@ pGBM.idh.prnp <- ggplot(
     name = "IDH status",
     values = c("#00BFC4", "#F8766D", "#E5E0E4"),
     labels = c(
-      paste0("IDH-mutant (n=", length(unique(pGBM_log_metadata$sample_submitter_id[pGBM_log_metadata$paper_IDH.status == "Mutant"])), ")"), 
-      paste0("IDHwt (n=", length(unique(pGBM_log_metadata$sample_submitter_id[pGBM_log_metadata$paper_IDH.status == "WT"])), ")"),
-      paste0("Unclassified (n=", length(unique(pGBM_log_metadata$sample_submitter_id[is.na(pGBM_log_metadata$paper_IDH.status)])), ")")
+      paste0("IDH-mutant (n=", table(pGBM_log_metadata$paper_IDH.status)["Mutant"], ")"), 
+      paste0("IDHwt (n=", table(pGBM_log_metadata$paper_IDH.status)["WT"], ")"),
+      paste0("Unclassified (n=", length(unique(pGBM_log_metadata$barcode[is.na(pGBM_log_metadata$paper_IDH.status)])), ")")
     )
   ) +
   stat_compare_means( # Kruskal-Wallis test
@@ -198,10 +198,10 @@ pGBM.sub.prnp <- ggplot(
     name = "Transcriptional subtype",
     values = c("#F8766D", "#7CAE00", "#C77CFF", "#E5E0E4"),
     labels = c(
-      paste0("Classical (n=", length(unique(pGBM_log_metadata$sample_submitter_id[pGBM_log_metadata$paper_Transcriptome.Subtype_clean == "CL"])), ")"), 
-      paste0("Mesenchymal (n=", length(unique(pGBM_log_metadata$sample_submitter_id[pGBM_log_metadata$paper_Transcriptome.Subtype_clean == "ME"])), ")"),
-      paste0("Proneural (n=", length(unique(pGBM_log_metadata$sample_submitter_id[pGBM_log_metadata$paper_Transcriptome.Subtype_clean == "PN"])), ")"),
-      paste0("Unclassified (n=", length(unique(pGBM_log_metadata$sample_submitter_id[is.na(pGBM_log_metadata$paper_Transcriptome.Subtype_clean)])), ")")
+      paste0("Classical (n=", table(pGBM_log_metadata$paper_Transcriptome.Subtype_clean)["CL"], ")"), 
+      paste0("Mesenchymal (n=", table(pGBM_log_metadata$paper_Transcriptome.Subtype_clean)["ME"], ")"),
+      paste0("Proneural (n=", table(pGBM_log_metadata$paper_Transcriptome.Subtype_clean)["PN"], ")"),
+      paste0("Unclassified (n=", length(unique(pGBM_log_metadata$barcode[is.na(pGBM_log_metadata$paper_Transcriptome.Subtype_clean)])), ")")
     )
   )
 
@@ -298,6 +298,10 @@ PRNP_quartiles_metadata <- as.data.frame(t(pGBM_metadata_filt)) %>% dplyr::selec
 PRNP_quartiles_log_metadata <- cbind(PRNP_quartiles_log_metadata, t(PRNP_quartiles_metadata)) 
 colnames(PRNP_quartiles_log_metadata)[colnames(PRNP_quartiles_log_metadata) == "ENSG00000171867.17"] <- "PRNP"
 
+# Check amount of samples classified as PRNP-High/PRNP-Low.
+length(unique(rownames(PRNP_counts)[PRNP_counts$PRNP_status == "PRNP-High"]))
+length(unique(rownames(PRNP_counts)[PRNP_counts$PRNP_status == "PRNP-Low"]))
+
 #### @ FIGURE 1C (MAIN) @ #### 
 # Distribution of log-normalised PRNP counts in the PRNP-High/Low groups.
 groups.prnp.exp.hist <- ggplot(
@@ -312,7 +316,11 @@ groups.prnp.exp.hist <- ggplot(
   scale_fill_manual(
     name = "Group", 
     values = c("orange", "steelblue1"),
-    labels = c(expression(italic("PRNP")^"high"), expression(italic("PRNP")^"low"))) +
+    labels = c(
+      expression(italic("PRNP")^"high"~"(n=31)"), 
+      expression(italic("PRNP")^"low"~"(n=31)")
+    )
+  ) +
   theme(
     legend.position = "right",
     axis.text.x = element_text(size = 15),
@@ -333,7 +341,7 @@ groups.prnp.exp.hist
 dev.off()
 
 #### @ FIGURE 1D, RIGHT PANEL (MAIN) @ #### 
-# Proportion of classical, mesenchymal, proneural and unclassified samples in the PRNP-High/Low groups.
+# Proportion of classical, mesenchymal and proneural samples in the PRNP-High/Low groups.
 groups.prnp.sub <- ggplot(
   PRNP_quartiles_log_metadata,
   aes(x = reorder(PRNP_status, PRNP), fill = unlist(paper_Transcriptome.Subtype_clean))
@@ -351,8 +359,8 @@ groups.prnp.sub <- ggplot(
   ) +
   scale_fill_manual(
     name = "Subtype", 
-    values = c("#F8766D", "#7CAE00", "#C77CFF", "snow2"),
-    labels = c("Classical","Mesenchymal", "Proneural", "Unclassified")
+    values = c("#F8766D", "#7CAE00", "#C77CFF"),
+    labels = c("Classical","Mesenchymal", "Proneural")
   ) +
   scale_x_discrete(labels = c(expression(italic("PRNP")^"low"), expression(italic("PRNP")^"high")))
 
