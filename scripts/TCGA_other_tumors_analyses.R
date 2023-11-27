@@ -28,10 +28,10 @@ process_tcga <- function(
 ) {
   
   # Read count data.
-  count_data <- readRDS("data/other_tumours/", project_id, "/TCGA-", project_id, "_count_data.RDS")
+  count_data <- readRDS(paste0("data/other_tumors/", project_id, "/TCGA-", project_id, "_count_data.RDS"))
 
   # Read metadata.
-  metadata <- readRDS("data/other_tumours/", project_id, "/TCGA-", project_id, "_metadata.RDS")
+  metadata <- readRDS(paste0("data/other_tumors/", project_id, "/TCGA-", project_id, "_metadata.RDS"))
 
   # Get correspondence between ENSEMBL IDs and gene symbols.
   genemap <- getBM(
@@ -83,10 +83,10 @@ process_tcga <- function(
     if(table(metadata$tumor_stage)[stage] <= 4) next
 
     # Subset metadata to the given stage.
-    stage_metadata <- metadata %>% filter(tumor_stage == stage)
+    stage_metadata <- metadata %>% dplyr::filter(tumor_stage == stage)
     
     # Subset normalized count data to the given stage.
-    stage_norm_count_data <- norm_count_data %>% select(rownames(stage_metadata))
+    stage_norm_count_data <- norm_count_data %>% dplyr::select(rownames(stage_metadata))
     
     # Calculate GSVA scores for the given gene sets.
     stage_gsva <- gsva(as.matrix(stage_norm_count_data), genesets)
@@ -175,6 +175,7 @@ project_list <- c(
     "OV", "PAAD", "UCEC", "BLCA", "CHOL", "ACC", "PCPG", "SKCM"
 )
 
+## bug: gsva with expression data matrix withough gene names
 # Process each TCGA project...
 corr_all_projects <- data.frame()
 for(project in project_list) {
