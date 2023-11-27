@@ -18,7 +18,7 @@ download_tcga <- function(project_id) {
         project = paste0("TCGA-", project_id),
         data.category = "Transcriptome Profiling",
         data.type = "Gene Expression Quantification",
-        workflow.type = "HTSeq - Counts",
+        workflow.type = "STAR - Counts",
         experimental.strategy = "RNA-Seq"
     )
     # Download data.
@@ -35,8 +35,10 @@ download_tcga <- function(project_id) {
     # Get metadata.
     metadata <- as.data.frame(colData(data))
 
+    if(!dir.exists(paste0(getwd(), "/data/other_tumors/", project_id))) dir.create(paste0(getwd(), "/data/other_tumors/", project_id))
+
     # Define prefix for output file names.  
-    file_prefix <- paste0("data/other_tumors/", project_id, "/TCGA-", project_id, "_")
+    file_prefix <- paste0(getwd(), "/data/other_tumors/", project_id, "/TCGA-", project_id, "_")
     
     # Save count data to output file.
     saveRDS(
@@ -56,8 +58,8 @@ download_tcga <- function(project_id) {
 
 # Define TCGA project IDs.
 project_list <- c(
-    "BRCA", "COAD", "READ", "PRAD", "LUAD", "KIRC", "STAD", "HNSC", 
-    "OV", "PAAD", "UCEC", "BLCA", "CHOL", "ACC", "PCPG", "SKCM"
+    "BRCA", "COAD", "READ", "PRAD", "LUAD", "KIRC", "STAD", "HNSC", "ESCA", "LIHC",
+    "OV", "PAAD", "UCEC", "BLCA", "CHOL", "ACC", "PCPG", "SKCM", "THCA", "CESC"
 )
 
 # Download TCGA projects that were specified.
