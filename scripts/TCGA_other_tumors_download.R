@@ -5,7 +5,7 @@
 
 # Loading packages ####
 
-library(TCGAbiolinks)             # 2.23.5
+library(TCGAbiolinks)             # 2.30.0
 library(SummarizedExperiment)     # 1.20.0
 
 
@@ -18,7 +18,7 @@ download_tcga <- function(project_id) {
         project = paste0("TCGA-", project_id),
         data.category = "Transcriptome Profiling",
         data.type = "Gene Expression Quantification",
-        workflow.type = "HTSeq - Counts",
+        workflow.type = "STAR - Counts",
         experimental.strategy = "RNA-Seq"
     )
     # Download data.
@@ -34,9 +34,13 @@ download_tcga <- function(project_id) {
 
     # Get metadata.
     metadata <- as.data.frame(colData(data))
-
+    print('got here')
     # Define prefix for output file names.  
-    file_prefix <- paste0("data/other_tumors/", project_id, "/TCGA-", project_id, "_")
+    file_prefix <- paste0(getwd(),"/data/other_tumors/", project_id, "/TCGA-", project_id, "_")
+    folder_path <-  paste0(getwd(), "/data/other_tumors/", project_id)
+    if (!file.exists(folder_path)) {
+      dir.create(folder_path, recursive = TRUE)
+    }
     
     # Save count data to output file.
     saveRDS(
