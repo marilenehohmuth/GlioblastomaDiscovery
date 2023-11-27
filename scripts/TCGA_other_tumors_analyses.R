@@ -168,8 +168,8 @@ names(genesets_list) <- gsub(x = names(genesets_list), pattern = c("_"), replace
 
 # Define TCGA project IDs.
 project_list <- c(
-    "BRCA", "COAD", "READ", "PRAD", "LUAD", "KIRC", "STAD", "HNSC", 
-    "OV", "PAAD", "UCEC", "BLCA", "CHOL", "ACC", "PCPG", "SKCM"
+    "BRCA", "COAD", "READ", "PRAD", "LUAD", "KIRC", "STAD", "HNSC", "ESCA", "LIHC",
+    "OV", "PAAD", "UCEC", "BLCA", "CHOL", "ACC", "PCPG", "SKCM", "THCA", "CESC"
 )
 
 # Process each TCGA project...
@@ -183,7 +183,7 @@ for(project in project_list) {
 }
 
 # Save results to output file.
-write.csv(corr_all_projects, file = "results/TCGA/other_tumors/TCGA_correlation_PRNPvsTrafficGenesets.csv")
+write.csv(corr_all_projects, file = paste0(getwd(), "/results/TCGA/other_tumors/TCGA_correlation_PRNPvsTrafficGenesets.csv"))
 
 
 ##########################
@@ -191,17 +191,12 @@ write.csv(corr_all_projects, file = "results/TCGA/other_tumors/TCGA_correlation_
 ##########################
 
 labs <- c(
-  "Breast", "Colon", "Rectum"
-  
-  #"Prostate", "Lung", "Kidney", "Stomach", 
-  #"Head and neck", "Ovary", "Pancreas", "Uterus", "Bladder", "Gallbladder", 
-  #"Adrenal gland", "Skin"
+  "Breast", "Colon", "Rectum", "Prostate", "Lung", "Kidney", "Stomach", "Head and neck", "Ovary", "Cervix", "Nerve/adrenal gland"
+  "Pancreas", "Uterus", "Bladder", "Gallbladder", "Adrenal gland", "Skin", "Esophagus", "Liver", "Thyroid"
 )
 names(labs) <- c(
-  "BRCA", "COAD", "READ")
-  
- #  "PRAD", "LUAD", "KIRC", "STAD", "HNSC", "OV",
- # "PAAD", "UCEC", "BLCA", "CHOL", "ACC", "SKCM")
+  "BRCA", "COAD", "READ", "PRAD", "LUAD", "KIRC", "STAD", "HNSC", "OV", "CESC", "PCPG",
+  "PAAD", "UCEC", "BLCA", "CHOL", "ACC", "SKCM", "ESCA", "LIHC", "THCA")
 
 #### @ FIGURE S8 (SUPPLEMENTAL) @ #### 
 # Plotting the correlation between PRNP expression and traffic/vesicle signatures in
