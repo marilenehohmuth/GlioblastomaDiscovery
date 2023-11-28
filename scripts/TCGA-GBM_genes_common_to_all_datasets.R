@@ -160,12 +160,12 @@ pdf(
     height = 20
 )
 ggplot(
-    df_tissues[df_tissues$symbol != "PRNP",],
+    df_tissues[df_tissues$gene != "PRNP",],
     aes(x = tissue, y = as.numeric(expression))
 ) +
     geom_violin(aes(fill = tissue), scale = "width") +
     geom_boxplot(width = 0.25, outlier.shape = NA, fill = "white") +
-    facet_wrap(~symbol, scales = "free") +
+    facet_wrap(~gene, scales = "free") +
     theme_classic() +
     theme(
         axis.text.x = element_text(size = 10, angle = 45, vjust = 1, hjust = 1),
@@ -224,12 +224,12 @@ pdf(
     height = 20
 )
 ggplot(
-    df_idh[df_idh$symbol != "PRNP",],
+    df_idh[df_idh$gene != "PRNP",],
     aes(x = idh, y = as.numeric(expression))
 ) +
     geom_violin(aes(fill = idh), scale = "width") +
     geom_boxplot(width = 0.25, outlier.shape = NA, fill = "white") +
-    facet_wrap(~symbol, scales = "free") +
+    facet_wrap(~gene, scales = "free") +
     theme_classic() +
     theme(
         axis.text.x = element_text(size = 10, angle = 45, vjust = 1, hjust = 1),
@@ -278,12 +278,12 @@ pdf(
     height = 20
 )
 ggplot(
-    df_subtype[df_subtype$symbol != "PRNP",],
+    df_subtype[df_subtype$gene != "PRNP",],
     aes(x = subtype, y = as.numeric(expression))
 ) +
     geom_violin(aes(fill = subtype), scale = "width") +
     geom_boxplot(width = 0.25, outlier.shape = NA, fill = "white") +
-    facet_wrap(~symbol, scales = "free") +
+    facet_wrap(~gene, scales = "free") +
     theme_classic() +
     theme(
         axis.text.x = element_text(size = 10, angle = 45, vjust = 1, hjust = 1),
