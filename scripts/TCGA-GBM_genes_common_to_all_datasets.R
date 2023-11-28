@@ -352,8 +352,11 @@ pdf(
     width = 8,
     height = 8
 )
-ggplot(
-    as.data.frame(comparison_2$result),
+as.data.frame(comparison_2$result) %>% 
+  dplyr::filter(!(term_name %in% c('kidney', 'vacuole', 'lytic vacuole', 'lung',
+                                 'EEG with persistent abnormal rhythmic activity',
+                                 'EEG with constitutional variants'))) %>% 
+  ggplot(
     aes(x = -log10(as.numeric(p_value)), y = reorder(term_name, -log10(as.numeric(p_value))), size = as.numeric(intersection_size))
 ) +
     geom_point(shape = 21, color = "black", fill = "palegreen2") +
