@@ -472,6 +472,48 @@ pdf(paste0(getwd(), "/results/TCGA-GBM/TCGA-GBM_PRNP-High_vs_PRNP-Low_volcano_wi
 volcano
 dev.off()
 
+# Volcano plot with differentially expressed transcripts LABELED ON THE PLOT.
+top_genes <- deg.all %>% 
+  dplyr::arrange(desc(abs(log2FoldChange))) %>% 
+  dplyr::filter(gene_symbol != 'Unknown') %>% 
+  dplyr::filter(classification != 'Non-significant') %>% 
+  head(3)
+volcano <- ggplot(
+  deg.all[deg.all$gene_symbol != "PRNP",],
+  aes(x = log2FoldChange, y = -log10(padj), color = classification)) +
+  geom_point(size = 1, alpha = 0.5) +
+  theme_classic() +
+  scale_color_manual(
+    values = c("royalblue1", "lightgray", "indianred2"),
+    name = "",
+    labels = labs) +
+  xlab(expression(log[2]("Fold change"))) +
+  ylab(expression(-log[10]("Adjusted p-value"))) +
+  theme(
+    axis.text.x = element_text(size = 15),
+    axis.text.y = element_text(size = 15),
+    axis.title.x = element_text(size = 15),
+    axis.title.y = element_text(size = 15),
+    legend.text = element_text(size = 15),
+    legend.text.align = 0,
+    plot.title = element_text(size = 15, hjust = 0.5)
+  ) + 
+  guides(color = guide_legend(override.aes = list(size=5))) +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dashed") +
+  ggtitle(expression(italic("PRNP")^"high"~italic("versus")~italic("PRNP")^"low"))
+volcano <- volcano + geom_text(
+  data = top_genes,
+  aes(label = gene_symbol, hjust = 0, vjust = 0),
+  position = position_nudge(x = 0.1),
+  check_overlap = TRUE
+)
+pdf(paste0(getwd(), "/results/TCGA-GBM/TCGA-GBM_PRNP-High_vs_PRNP-Low_volcano_withoutPRNP_labeled_transcripts.pdf"), 
+    width = 8, height = 4)
+volcano
+dev.off()
+
+
 # Also create an alternative plot in which PRNP is not removed.
 volcano <- ggplot(
   deg.all,
@@ -503,8 +545,44 @@ volcano <- ggplot(
     color = "black",
     seed = 42
   )
-
 pdf(paste0(getwd(), "/results/TCGA-GBM/TCGA-GBM_PRNP-High_vs_PRNP-Low_volcano_withPRNP.pdf"), width = 8, height = 4)
+volcano
+dev.off()
+
+# Also create an alternative plot in which PRNP is not removed WITH LABELED GENES.
+top_genes <- deg.all %>% 
+  dplyr::filter(gene_symbol == 'PRNP')
+volcano <- ggplot(
+  deg.all,
+  aes(x = log2FoldChange, y = -log10(padj), color = classification)) +
+  geom_point(size = 1, alpha = 0.5) +
+  theme_classic() +
+  scale_color_manual(
+    values = c("royalblue1", "lightgray", "indianred2"),
+    name = "",
+    labels = labs) +
+  xlab(expression(log[2]("Fold change"))) +
+  ylab(expression(-log[10]("Adjusted p-value"))) +
+  theme(
+    axis.text.x = element_text(size = 15),
+    axis.text.y = element_text(size = 15),
+    axis.title.x = element_text(size = 15),
+    axis.title.y = element_text(size = 15),
+    legend.text = element_text(size = 15),
+    legend.text.align = 0,
+    plot.title = element_text(size = 15, hjust = 0.5)
+  ) + 
+  guides(color = guide_legend(override.aes = list(size=5))) +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dashed") +
+  ggtitle(expression(italic("PRNP")^"high"~italic("versus")~italic("PRNP")^"low"))
+volcano <- volcano + geom_text(
+  data = top_genes,
+  aes(label = gene_symbol, hjust = 0, vjust = 0),
+  position = position_nudge(x = 0.1),
+  check_overlap = TRUE
+)
+pdf(paste0(getwd(), "/results/TCGA-GBM/TCGA-GBM_PRNP-High_vs_PRNP-Low_volcano_withPRNP_labeled_transcripts.pdf"), width = 8, height = 4)
 volcano
 dev.off()
 
