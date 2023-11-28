@@ -1292,7 +1292,7 @@ write.csv(
 pdf(
     paste0(getwd(), "/results/comparison_single_cell/single_cell_datasets_common_genes_positiveCorr_with_PRNP_ORA_enrichGO_ontALL_padj0.05_selectedTerms.pdf"),
     width = 8,
-    height = 8
+    height = 18
 )
 ggplot(
     comparison[grepl("vesicle|transport", comparison$Description),],
