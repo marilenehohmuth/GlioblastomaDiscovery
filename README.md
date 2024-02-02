@@ -17,3 +17,114 @@ This repo provides the scripts used for the "Transcriptomics reveals an enhanced
 * TCGA_other_tumors_analyses.R: analysis of TCGA data for other tumors.
 
 The repo also includes the code for the Shiny App in the shiny_app folder.
+
+## Tutorial
+### Installing git 
+
+Firstly, install git in your machine according with its Operational System:
+
+#### Linux
+
+Press CTRL + T in order to open your terminal, subsequently copy and paste the following code:
+
+If you're on a Fedora distribution,
+
+```
+sudo dnf install git-all
+```
+
+If you're on a Debian distributuon,
+
+```
+sudo apt install git-all
+```
+
+#### MacOs
+
+Press Command + Space and type in "Terminal" and then open it. On the terminal copy and paste the following code:
+
+If you have Homebrew,
+
+```
+brew install git
+```
+
+If you have MacPorts,
+
+```
+brew install git
+```
+
+(In case of not having any of them, check for documentation at [Homebrew](https://docs.brew.sh/) and [MacPorts](https://guide.macports.org/))
+
+#### Windows
+
+Use the installer availabe at [Git for Windows](https://git-scm.com/download/win).
+
+### Cloning this repository
+
+Now that you have Git installed, open your terminal and copy and paste the following code:
+
+
+```
+git clone https://github.com/marilenehohmuth/GlioblastomaDiscovery
+```
+
+This will make a copy of all files of this project to your computer.
+
+### Installing R and RStudio
+
+In order to run the code and have acess to an user-friendly interface you'll need to install R and RStudio, respectively.
+
+#### R on Linux
+
+Press CTRL + T in order to open your terminal, subsequently copy and paste the following code:
+
+If you're on a Fedora distribution,
+
+```
+sudo dnf install R
+```
+
+If you're on a Debian distribution,
+
+```
+sudo apt install R
+```
+
+#### R on MacOS
+
+Use the installer avaliable at [R for MacOS](http://lib.stat.cmu.edu/R/CRAN/)
+
+#### R on Windows
+
+Use the installer avaliable at [R for Windows](http://lib.stat.cmu.edu/R/CRAN/)
+
+#### RStudio on Linux
+
+At [RStudio Desktop](https://posit.co/download/rstudio-desktop/) search for the appropriate version based on your distribution and download it.
+
+Press CTRL + T in order to open your terminal, subsequently copy and paste the following code:
+
+If you're on a Fedora distribution,
+
+```
+sudo dnf install rstudio-desktop
+```
+
+If you're on a Debian distribution,
+
+```
+sudo apt install rstudio
+```
+
+
+#### RStudio on MacOS
+
+Use the installer avaliable at [RStudio for MacOS](https://posit.co/downloads/) 
+
+#### RStudio on Windows
+
+Use the installer avaliable at [RStudio for Windows](https://posit.co/download/rstudio-desktop/)
+
+After those steps you'll be able to visualize our app code at your own machine. However, in order to get access to the user-friendly interface and use the app tools, you need to install all required R libraries. Some of them are in the code and will be automaticaly installed as soon as you try to run the app. Some of them will need to be individually installed.
