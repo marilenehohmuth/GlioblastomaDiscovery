@@ -33,7 +33,7 @@ If you're on a Fedora distribution,
 sudo dnf install git-all
 ```
 
-If you're on a Debian distributuon,
+If you're on a Debian distribution,
 
 ```
 sudo apt install git-all
@@ -70,7 +70,7 @@ Now that you have Git installed, open your terminal and copy and paste the follo
 git clone https://github.com/marilenehohmuth/GlioblastomaDiscovery
 ```
 
-This will make a copy of all files of this project to your computer.
+This will make a copy of all files of this project in your computer.
 
 ### Installing R and RStudio
 
@@ -127,4 +127,4 @@ Use the installer available at [RStudio for MacOS](https://posit.co/downloads/)
 
 Use the installer available at [RStudio for Windows](https://posit.co/download/rstudio-desktop/)
 
-After those steps you'll be able to visualize our app code at your own machine. However, in order to get access to the user-friendly interface and use the app tools, you need to install all required R libraries. Some of them are in the code and will be automaticaly installed as soon as you try to run the app. Some of them will need to be individually installed.
+After those steps you'll be able to visualize our app code at your own machine. However, in order to get access to the user-friendly interface and use the app tools, you need to install all required R libraries. Some of them are in the code and will be automatically installed as soon as you try to run the app. Some of them will need to be individually installed.
