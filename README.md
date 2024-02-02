@@ -59,7 +59,7 @@ brew install git
 
 #### Windows
 
-Use the installer availabe at [Git for Windows](https://git-scm.com/download/win).
+Use the installer available at [Git for Windows](https://git-scm.com/download/win).
 
 ### Cloning this repository
 
