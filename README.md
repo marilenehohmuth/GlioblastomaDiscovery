@@ -94,11 +94,11 @@ sudo apt install R
 
 #### R on MacOS
 
-Use the installer avaliable at [R for MacOS](http://lib.stat.cmu.edu/R/CRAN/)
+Use the installer available at [R for MacOS](http://lib.stat.cmu.edu/R/CRAN/)
 
 #### R on Windows
 
-Use the installer avaliable at [R for Windows](http://lib.stat.cmu.edu/R/CRAN/)
+Use the installer available at [R for Windows](http://lib.stat.cmu.edu/R/CRAN/)
 
 #### RStudio on Linux
 
@@ -121,10 +121,10 @@ sudo apt install rstudio
 
 #### RStudio on MacOS
 
-Use the installer avaliable at [RStudio for MacOS](https://posit.co/downloads/) 
+Use the installer available at [RStudio for MacOS](https://posit.co/downloads/) 
 
 #### RStudio on Windows
 
-Use the installer avaliable at [RStudio for Windows](https://posit.co/download/rstudio-desktop/)
+Use the installer available at [RStudio for Windows](https://posit.co/download/rstudio-desktop/)
 
 After those steps you'll be able to visualize our app code at your own machine. However, in order to get access to the user-friendly interface and use the app tools, you need to install all required R libraries. Some of them are in the code and will be automaticaly installed as soon as you try to run the app. Some of them will need to be individually installed.
