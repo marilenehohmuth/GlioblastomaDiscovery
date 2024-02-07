@@ -18,6 +18,10 @@ This repo provides the scripts used for the "Transcriptomics reveals an enhanced
 
 The repo also includes the code for the Shiny App in the shiny_app folder.
 
+## Warning
+
+Due to storage limitations we couldn't provide all genes to our database. If you try to run a gene which isn't in our database the app will not analyse it. With this is mind, the best way to check our avaliable genes is seeking for genes in the correlation tables.
+
 ## Tutorial
 ### Installing git 
 
